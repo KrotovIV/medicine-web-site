@@ -10,3 +10,21 @@ spring:
       static-locations: classpath:/static/
       cache:
         period: 0
+  devtools:
+    restart:
+      enabled: true
+      poll-interval: 1s
+      quiet-period: 400ms
+      additional-paths:
+        - src/main/java
+        - src/main/resources
+    livereload:
+      enabled: true
+      port: 35729
+
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
