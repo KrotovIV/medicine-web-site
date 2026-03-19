@@ -2,29 +2,397 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Главная страница</title>
+    <title>Медицинский кабинет - Пациенты</title>
     <style>
-        .container { max-width: 800px; margin: 50px auto; text-align: center; }
-        .auth-status { padding: 20px; margin: 20px; border-radius: 5px; }
-        .authenticated { background-color: #d4edda; color: #155724; }
-        .unauthenticated { background-color: #f8d7da; color: #721c24; }
-        .btn { padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 10px; }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-danger { background-color: #dc3545; color: white; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #faf7f0;
+            background-image: radial-gradient(#e0d5c0 1px, transparent 1px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Шапка с профилем */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 20px 25px;
+            background-color: rgba(255, 248, 235, 0.9);
+            border-radius: 30px 30px 30px 30px;
+            box-shadow: 0 8px 20px rgba(180, 150, 100, 0.15);
+            border: 2px solid #ecd9b4;
+            backdrop-filter: blur(5px);
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 2px dashed #d4b68a;
+            border-radius: 25px;
+            pointer-events: none;
+        }
+
+        .welcome-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            background-color: #f5e6d3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            border: 3px solid #e6c9a8;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .welcome-text {
+            font-size: 1.3rem;
+            color: #7d5e3a;
+        }
+
+        .welcome-text strong {
+            color: #a77b4f;
+            font-weight: 600;
+            background-color: #fff0db;
+            padding: 5px 15px;
+            border-radius: 40px;
+            border: 2px solid #ecd9b4;
+            margin-left: 10px;
+        }
+
+        .logout-btn {
+            background-color: #fff0db;
+            color: #b08a5c;
+            border: 3px solid #dbbd95;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 8px rgba(180, 150, 100, 0.1);
+            position: relative;
+        }
+
+        .logout-btn:hover {
+            background-color: #ffe4c4;
+            border-color: #c4a177;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(180, 150, 100, 0.2);
+        }
+
+        .logout-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Заголовок раздела */
+        .section-title {
+            font-size: 2.2rem;
+            color: #7d5e3a;
+            margin: 40px 0 30px 20px;
+            font-weight: 500;
+            display: inline-block;
+            padding: 0 30px 10px 30px;
+            border-bottom: 4px dashed #e6c9a8;
+            letter-spacing: 1px;
+        }
+
+        /* Сетка карточек */
+        .patients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        /* Карточка пациента */
+        .patient-card {
+            background-color: #fffaf0;
+            border: 3px solid #ecd9b4;
+            border-radius: 35px 35px 35px 35px;
+            padding: 25px 20px 20px 20px;
+            box-shadow: 0 10px 25px rgba(170, 140, 100, 0.15);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            backdrop-filter: blur(2px);
+        }
+
+        .patient-card:hover {
+            transform: translateY(-8px);
+            border-color: #dbbd95;
+            box-shadow: 0 18px 35px rgba(160, 130, 80, 0.2);
+            background-color: #fffdf7;
+        }
+
+        .patient-card:active {
+            transform: translateY(-2px);
+        }
+
+        .card-decoration {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            right: 15px;
+            height: 15px;
+            border-bottom: 2px dashed #e6c9a8;
+        }
+
+        .patient-avatar {
+            width: 100px;
+            height: 100px;
+            background-color: #f5e6d3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin: 15px 0 15px 0;
+            border: 4px solid #e6c9a8;
+            box-shadow: 0 8px 0 #d2b48c;
+            transition: all 0.2s ease;
+        }
+
+        .patient-card:hover .patient-avatar {
+            box-shadow: 0 10px 0 #c4a177;
+        }
+
+        .patient-name {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #7d5e3a;
+            margin: 10px 0 5px 0;
+            line-height: 1.3;
+        }
+
+        .patient-age {
+            font-size: 1.2rem;
+            color: #a77b4f;
+            background-color: #fff0db;
+            padding: 5px 18px;
+            border-radius: 40px;
+            border: 2px solid #ecd9b4;
+            margin: 10px 0;
+            display: inline-block;
+        }
+
+        .patient-condition {
+            font-size: 1.1rem;
+            color: #8f6f48;
+            margin: 10px 0 5px 0;
+            padding: 8px 0;
+            border-top: 2px dashed #ecd9b4;
+            border-bottom: 2px dashed #ecd9b4;
+            width: 100%;
+        }
+
+        .last-visit {
+            font-size: 0.95rem;
+            color: #b99e7c;
+            margin: 15px 0 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Заглушка для сообщения */
+        .alert-message {
+            background-color: rgba(255, 248, 235, 0.9);
+            border: 3px dashed #dbbd95;
+            border-radius: 60px;
+            padding: 40px;
+            text-align: center;
+            margin: 50px 0;
+            color: #7d5e3a;
+            font-size: 1.3rem;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Кнопка добавления (заглушка) */
+        .add-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #fff0db;
+            border: 3px solid #dbbd95;
+            border-radius: 60px;
+            padding: 15px 35px;
+            margin: 40px 0 20px 0;
+            color: #a77b4f;
+            font-size: 1.2rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 0 #d2b48c;
+        }
+
+        .add-button:hover {
+            background-color: #ffe9d1;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #c4a177;
+        }
+
+        .add-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #c4a177;
+        }
+
+        /* Рисованные элементы */
+        .hand-drawn-line {
+            height: 3px;
+            background: repeating-linear-gradient(90deg, #dbbd95 0px, #dbbd95 10px, transparent 10px, transparent 20px);
+            margin: 30px 0;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .patients-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>Главная страница</h1>
-
-    <div th:if="${isAuthenticated}" class="auth-status authenticated">
-        <p>✅ Вы авторизованы как пользователь: <strong th:text="${username}">Пользователь</strong></p>
-        <a href="/logout" class="btn btn-danger">Выйти</a>
+    <!-- Шапка с информацией о пользователе -->
+    <div class="header" th:if="${isAuthenticated}">
+        <div class="welcome-section">
+            <div class="avatar">👨‍⚕️</div>
+            <div class="welcome-text">
+                Здравствуйте, <strong th:text="${username}">Доктор</strong>
+            </div>
+        </div>
+        <a href="/logout" class="logout-btn">🚪 Выйти</a>
     </div>
 
-    <div th:unless="${isAuthenticated}" class="auth-status unauthenticated">
-        <p>❌ Вы не авторизованыыыыыыыыыыыыыыыы</p>
-        <a href="/login" class="btn btn-primary">Войти</a>
+    <!-- Основной контент для авторизованного пользователя -->
+    <div th:if="${isAuthenticated}">
+        <h2 class="section-title">📋 Мои пациенты</h2>
+
+        <!-- Сетка с карточками пациентов (хардкод для примера) -->
+        <div class="patients-grid">
+            <!-- Карточка пациента 1 -->
+            <div class="patient-card" onclick="alert('Страница пациента: Иванов Иван (в разработке)')">
+                <div class="card-decoration"></div>
+                <div class="patient-avatar">👴</div>
+                <div class="patient-name">Иванов Иван</div>
+                <div class="patient-age">72 года</div>
+                <div class="patient-condition">Гипертония, артрит</div>
+                <div class="last-visit">🩺 Последний визит: 3 дня назад</div>
+            </div>
+
+            <!-- Карточка пациента 2 -->
+            <div class="patient-card" onclick="alert('Страница пациента: Петрова Мария (в разработке)')">
+                <div class="card-decoration"></div>
+                <div class="patient-avatar">👵</div>
+                <div class="patient-name">Петрова Мария</div>
+                <div class="patient-age">68 лет</div>
+                <div class="patient-condition">Сахарный диабет 2 типа</div>
+                <div class="last-visit">🩺 Последний визит: Вчера</div>
+            </div>
+
+            <!-- Карточка пациента 3 -->
+            <div class="patient-card" onclick="alert('Страница пациента: Сидоров Алексей (в разработке)')">
+                <div class="card-decoration"></div>
+                <div class="patient-avatar">👨</div>
+                <div class="patient-name">Сидоров Алексей</div>
+                <div class="patient-age">45 лет</div>
+                <div class="patient-condition">Профилактический осмотр</div>
+                <div class="last-visit">🩺 Последний визит: 2 недели назад</div>
+            </div>
+
+            <!-- Карточка пациента 4 -->
+            <div class="patient-card" onclick="alert('Страница пациента: Козлова Елена (в разработке)')">
+                <div class="card-decoration"></div>
+                <div class="patient-avatar">👩</div>
+                <div class="patient-name">Козлова Елена</div>
+                <div class="patient-age">34 года</div>
+                <div class="patient-condition">Наблюдение, здоров</div>
+                <div class="last-visit">🩺 Последний визит: 1 месяц назад</div>
+            </div>
+
+            <!-- Карточка пациента 5 -->
+            <div class="patient-card" onclick="alert('Страница пациента: Николаев Петр (в разработке)')">
+                <div class="card-decoration"></div>
+                <div class="patient-avatar">👴</div>
+                <div class="patient-name">Николаев Петр</div>
+                <div class="patient-age">81 год</div>
+                <div class="patient-condition">ИБС, ХСН</div>
+                <div class="last-visit">🩺 Последний визит: 5 дней назад</div>
+            </div>
+
+            <!-- Карточка пациента 6 -->
+            <div class="patient-card" onclick="alert('Страница пациента: Смирнова Анна (в разработке)')">
+                <div class="card-decoration"></div>
+                <div class="patient-avatar">👵</div>
+                <div class="patient-name">Смирнова Анна</div>
+                <div class="patient-age">57 лет</div>
+                <div class="patient-condition">Артроз, остеопороз</div>
+                <div class="last-visit">🩺 Последний визит: Сегодня утром</div>
+            </div>
+        </div>
+
+        <!-- Кнопка добавления нового пациента (заглушка) -->
+        <div style="text-align: center;">
+            <div class="add-button" onclick="alert('Форма добавления пациента (в разработке)')">
+                <span>➕</span> Добавить пациента
+            </div>
+        </div>
+
+        <!-- Декоративная линия -->
+        <div class="hand-drawn-line"></div>
+
+        <!-- Информационная заглушка -->
+        <div class="alert-message">
+            ⚕️ При нажатии на карточку откроется страница пациента<br>
+            <small style="color: #b99e7c;">(функционал в разработке)</small>
+        </div>
+    </div>
+
+    <!-- Сообщение для неавторизованных (на всякий случай, но контроллер делает редирект) -->
+    <div th:unless="${isAuthenticated}" class="alert-message" style="margin-top: 100px;">
+        <p style="font-size: 2rem; margin-bottom: 20px;">🔒</p>
+        <p>Неавторизованный доступ запрещен</p>
+        <a href="/login" style="display: inline-block; margin-top: 30px; padding: 15px 40px; background-color: #fff0db; border: 3px solid #dbbd95; border-radius: 50px; text-decoration: none; color: #7d5e3a; font-weight: bold;">Войти в систему</a>
     </div>
 </div>
 </body>
