@@ -1,7 +1,11 @@
 package com.github.KrotovIV.frontend;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
 public class FrontendApplication {
     public static void main(String[] args) {
-        System.out.println("Frontend module started");
+        SpringApplication.run(FrontendApplication.class, args);
     }
 }
