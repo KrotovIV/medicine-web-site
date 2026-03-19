@@ -311,7 +311,7 @@
         <!-- Сетка с карточками пациентов (хардкод для примера) -->
         <div class="patients-grid">
             <!-- Список всех пациентов -->
-            <div th:each="patient : ${patients}" class="patient-card" onclick="alert('Страница пациента: Иванов Иван (в разработке)')">
+            <div th:each="patient : ${patients}" class="patient-card" onclick="alert('Страница пациента (в разработке)')">
                 <div class="card-decoration"></div>
                 <div class="patient-avatar" th:text="${patient.avatar}">$avatar$</div>
                 <div class="patient-name" th:text="${patient.name}">$name$</div>
