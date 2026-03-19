@@ -310,64 +310,14 @@
 
         <!-- Сетка с карточками пациентов (хардкод для примера) -->
         <div class="patients-grid">
-            <!-- Карточка пациента 1 -->
-            <div class="patient-card" onclick="alert('Страница пациента: Иванов Иван (в разработке)')">
+            <!-- Список всех пациентов -->
+            <div th:each="patient : ${patients}" class="patient-card" onclick="alert('Страница пациента: Иванов Иван (в разработке)')">
                 <div class="card-decoration"></div>
-                <div class="patient-avatar">👴</div>
-                <div class="patient-name">Иванов Иван</div>
-                <div class="patient-age">72 года</div>
-                <div class="patient-condition">Гипертония, артрит</div>
-                <div class="last-visit">🩺 Последний визит: 3 дня назад</div>
-            </div>
-
-            <!-- Карточка пациента 2 -->
-            <div class="patient-card" onclick="alert('Страница пациента: Петрова Мария (в разработке)')">
-                <div class="card-decoration"></div>
-                <div class="patient-avatar">👵</div>
-                <div class="patient-name">Петрова Мария</div>
-                <div class="patient-age">68 лет</div>
-                <div class="patient-condition">Сахарный диабет 2 типа</div>
-                <div class="last-visit">🩺 Последний визит: Вчера</div>
-            </div>
-
-            <!-- Карточка пациента 3 -->
-            <div class="patient-card" onclick="alert('Страница пациента: Сидоров Алексей (в разработке)')">
-                <div class="card-decoration"></div>
-                <div class="patient-avatar">👨</div>
-                <div class="patient-name">Сидоров Алексей</div>
-                <div class="patient-age">45 лет</div>
-                <div class="patient-condition">Профилактический осмотр</div>
-                <div class="last-visit">🩺 Последний визит: 2 недели назад</div>
-            </div>
-
-            <!-- Карточка пациента 4 -->
-            <div class="patient-card" onclick="alert('Страница пациента: Козлова Елена (в разработке)')">
-                <div class="card-decoration"></div>
-                <div class="patient-avatar">👩</div>
-                <div class="patient-name">Козлова Елена</div>
-                <div class="patient-age">34 года</div>
-                <div class="patient-condition">Наблюдение, здоров</div>
-                <div class="last-visit">🩺 Последний визит: 1 месяц назад</div>
-            </div>
-
-            <!-- Карточка пациента 5 -->
-            <div class="patient-card" onclick="alert('Страница пациента: Николаев Петр (в разработке)')">
-                <div class="card-decoration"></div>
-                <div class="patient-avatar">👴</div>
-                <div class="patient-name">Николаев Петр</div>
-                <div class="patient-age">81 год</div>
-                <div class="patient-condition">ИБС, ХСН</div>
-                <div class="last-visit">🩺 Последний визит: 5 дней назад</div>
-            </div>
-
-            <!-- Карточка пациента 6 -->
-            <div class="patient-card" onclick="alert('Страница пациента: Смирнова Анна (в разработке)')">
-                <div class="card-decoration"></div>
-                <div class="patient-avatar">👵</div>
-                <div class="patient-name">Смирнова Анна</div>
-                <div class="patient-age">57 лет</div>
-                <div class="patient-condition">Артроз, остеопороз</div>
-                <div class="last-visit">🩺 Последний визит: Сегодня утром</div>
+                <div class="patient-avatar" th:text="${patient.avatar}">$avatar$</div>
+                <div class="patient-name" th:text="${patient.name}">$name$</div>
+                <div class="patient-age" th:text="${patient.age}">$age$</div>
+                <div class="patient-condition" th:text="${patient.condition}">$condition$</div>
+                <div class="last-visit" th:text="${patient.lastVisitDate}">$last_visit$</div>
             </div>
         </div>
 
