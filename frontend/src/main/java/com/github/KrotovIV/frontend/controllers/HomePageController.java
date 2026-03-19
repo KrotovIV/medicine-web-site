@@ -16,11 +16,13 @@ public class HomePageController {
         // проверка наличия jwt-токена в куках
         boolean isAuthenticated = jwtToken != null && !jwtToken.isEmpty();
 
-        model.addAttribute("isAuthenticated", isAuthenticated);
+        if (!isAuthenticated)
+            return "redirect:/login";
 
-        if (isAuthenticated) {
-            model.addAttribute("username", "Пользователь");
-        }
+        // отображение статуса пользователя на странице
+        model.addAttribute("isAuthenticated", isAuthenticated);
+        model.addAttribute("username", "Пользователь");
+
 
         return "home_page";
     }
