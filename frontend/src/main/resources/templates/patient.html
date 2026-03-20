@@ -73,6 +73,12 @@
             border-color: #dbbd95;
         }
 
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
         .patient-badge {
             background-color: #fff0db;
             padding: 10px 20px;
@@ -80,6 +86,40 @@
             border: 2px solid #ecd9b4;
             color: #7d5e3a;
             font-weight: 500;
+        }
+
+        /* Переключатель режимов */
+        .view-switcher {
+            display: flex;
+            gap: 10px;
+            background-color: #fff0db;
+            border: 2px solid #ecd9b4;
+            border-radius: 50px;
+            padding: 5px;
+        }
+
+        .view-btn {
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #7d5e3a;
+            font-weight: 500;
+            background: transparent;
+            border: none;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .view-btn.active {
+            background-color: #e6c9a8;
+            border-color: #c4a177;
+            color: #5f4a2e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .view-btn:hover:not(.active) {
+            background-color: #ffe9d1;
         }
 
         /* Фильтры */
@@ -121,7 +161,15 @@
             border-color: #dbbd95;
         }
 
-        /* Основной контент */
+        /* ========== РЕЖИМ КАРТЫ СВЯЗЕЙ ========== */
+        .view-mode {
+            display: none;
+        }
+
+        .view-mode.active {
+            display: block;
+        }
+
         .patient-map {
             position: relative;
             min-height: 700px;
@@ -131,7 +179,6 @@
             overflow: visible;
         }
 
-        /* Центральная карточка пациента */
         .central-card {
             position: absolute;
             left: 50%;
@@ -185,7 +232,6 @@
             border: 2px solid #ecd9b4;
         }
 
-        /* Контейнер для медиа-карточек */
         .media-nodes {
             position: relative;
             width: 100%;
@@ -225,7 +271,144 @@
             border-color: #dbbd95;
         }
 
-        /* Типы медиафайлов */
+        .connections-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .connections-canvas svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .connection-line {
+            stroke: #dbbd95;
+            stroke-width: 2;
+            stroke-dasharray: 5 5;
+            fill: none;
+        }
+
+        /* ========== РЕЖИМ ТАЙМЛАЙН ========== */
+        .timeline-view {
+            margin: 40px 0;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .timeline-container {
+            position: relative;
+            min-height: 600px;
+            padding: 40px 0;
+        }
+
+        /* Центральная линия времени */
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #e6c9a8, #c4a177, #e6c9a8);
+            transform: translateX(-50%);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(196, 161, 119, 0.3);
+        }
+
+        .timeline-line::before,
+        .timeline-line::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background-color: #c4a177;
+            border-radius: 50%;
+            border: 3px solid #fff0db;
+        }
+
+        .timeline-line::before {
+            top: -8px;
+        }
+
+        .timeline-line::after {
+            bottom: -8px;
+        }
+
+        /* Точки на линии времени */
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            background-color: #dbbd95;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            border: 2px solid #fffaf0;
+            z-index: 5;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .timeline-dot:hover {
+            transform: translateX(-50%) scale(1.5);
+            background-color: #c4a177;
+        }
+
+        /* Карточки в таймлайне */
+        .timeline-card {
+            position: absolute;
+            width: 280px;
+            background: #fffaf0;
+            border: 3px solid #ecd9b4;
+            border-radius: 30px;
+            padding: 15px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .timeline-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(170, 140, 100, 0.2);
+            border-color: #dbbd95;
+        }
+
+        .timeline-card.left {
+            right: calc(50% + 30px);
+            left: auto;
+        }
+
+        .timeline-card.right {
+            left: calc(50% + 30px);
+            right: auto;
+        }
+
+        /* Адаптивность для таймлайна */
+        @media (max-width: 768px) {
+            .timeline-line {
+                left: 30px;
+            }
+            .timeline-dot {
+                left: 30px;
+            }
+            .timeline-card.left,
+            .timeline-card.right {
+                left: 80px;
+                right: 20px;
+                width: calc(100% - 100px);
+            }
+            .timeline-card.left {
+                right: auto;
+            }
+        }
+
+        /* Общие стили для карточек */
         .media-type-icon {
             font-size: 2rem;
             margin-bottom: 10px;
@@ -311,29 +494,6 @@
             display: inline-block;
         }
 
-        /* SVG для связей */
-        .connections-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .connections-canvas svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        .connection-line {
-            stroke: #dbbd95;
-            stroke-width: 2;
-            stroke-dasharray: 5 5;
-            fill: none;
-        }
-
         /* Кнопка добавления */
         .add-media-btn {
             position: fixed;
@@ -355,33 +515,6 @@
             transform: translateY(-3px);
             box-shadow: 0 9px 0 #c4a177;
         }
-
-        @media (max-width: 768px) {
-            .media-card {
-                position: relative !important;
-                margin: 20px auto;
-                transform: none !important;
-                left: auto !important;
-                top: auto !important;
-            }
-            .media-nodes {
-                min-height: auto;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            .connections-canvas {
-                display: none;
-            }
-            .central-card {
-                position: relative;
-                margin: 20px auto;
-                transform: none;
-            }
-            .patient-map {
-                min-height: auto;
-            }
-        }
     </style>
 </head>
 <body>
@@ -391,8 +524,14 @@
         <a href="/" class="back-link">
             ← На главную
         </a>
-        <div class="patient-badge">
-            👨‍⚕️ <span th:text="${username}">Доктор</span>
+        <div class="header-controls">
+            <div class="view-switcher">
+                <button class="view-btn active" data-view="graph">🗺️ Карта связей</button>
+                <button class="view-btn" data-view="timeline">📅 Таймлайн</button>
+            </div>
+            <div class="patient-badge">
+                👨‍⚕️ <span th:text="${username}">Доктор</span>
+            </div>
         </div>
     </div>
 
@@ -401,22 +540,29 @@
         <span class="filter-tag active" data-tag="all">📋 Все</span>
     </div>
 
-    <!-- Карта пациента -->
-    <div class="patient-map" id="patientMap">
-        <!-- Центральная карточка пациента -->
-        <div class="central-card" id="centralCard">
-            <div class="patient-avatar">👴</div>
-            <div class="patient-name">Иван Иванов</div>
-            <div class="patient-age">72 года</div>
-            <div class="patient-age" style="margin-top: 8px;">📅 15.03.1954</div>
+    <!-- Режим: Карта связей -->
+    <div id="graphView" class="view-mode active">
+        <div class="patient-map" id="patientMap">
+            <div class="central-card" id="centralCard">
+                <div class="patient-avatar">👴</div>
+                <div class="patient-name">Иван Иванов</div>
+                <div class="patient-age">72 года</div>
+                <div class="patient-age" style="margin-top: 8px;">📅 15.03.1954</div>
+            </div>
+            <div class="media-nodes" id="mediaNodes"></div>
+            <div class="connections-canvas" id="connectionsCanvas">
+                <svg></svg>
+            </div>
         </div>
+    </div>
 
-        <!-- Контейнер для медиа-карточек -->
-        <div class="media-nodes" id="mediaNodes"></div>
-
-        <!-- SVG для линий связей -->
-        <div class="connections-canvas" id="connectionsCanvas">
-            <svg></svg>
+    <!-- Режим: Таймлайн -->
+    <div id="timelineView" class="view-mode">
+        <div class="timeline-view">
+            <div class="timeline-container" id="timelineContainer">
+                <div class="timeline-line"></div>
+                <div id="timelineCards"></div>
+            </div>
         </div>
     </div>
 
@@ -427,18 +573,18 @@
 </div>
 
 <script>
-    // Данные медиафайлов
-    // Исправленные начальные позиции медиафайлов
+    // Данные медиафайлов с сортировкой по дате для таймлайна
     let mediaFiles = [
         {
             id: 1,
             type: 'photo',
             icon: '📸',
-            content: 'https://picsum.photos/200/150?random=1',
+            content: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Santiago_cathedral_2021.jpg/960px-Santiago_cathedral_2021.jpg',
             date: '2024-03-15 14:30',
+            dateObj: new Date(2024, 2, 15, 14, 30),
             note: 'Рентген грудной клетки',
             tags: ['рентген', 'грудная клетка'],
-            position: { x: 350, y: 50 }  // Правая сторона
+            position: { x: 350, y: 50 }
         },
         {
             id: 2,
@@ -446,9 +592,10 @@
             icon: '🎥',
             content: 'https://www.w3schools.com/html/mov_bbb.mp4',
             date: '2024-03-10 11:20',
+            dateObj: new Date(2024, 2, 10, 11, 20),
             note: 'Видео осмотра',
             tags: ['осмотр', 'видео'],
-            position: { x: 50, y: 50 }   // Левая сторона
+            position: { x: 50, y: 50 }
         },
         {
             id: 3,
@@ -456,9 +603,10 @@
             icon: '🎵',
             content: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
             date: '2024-03-05 09:15',
+            dateObj: new Date(2024, 2, 5, 9, 15),
             note: 'Запись голоса пациента',
             tags: ['голос', 'жалобы'],
-            position: { x: 50, y: 400 }  // Нижняя левая часть
+            position: { x: 50, y: 400 }
         },
         {
             id: 4,
@@ -466,9 +614,10 @@
             icon: '📝',
             content: 'Жалобы на боли в области сердца, одышку при нагрузке. Рекомендовано: ЭКГ, консультация кардиолога.',
             date: '2024-03-01 16:45',
+            dateObj: new Date(2024, 2, 1, 16, 45),
             note: 'Заметка врача',
             tags: ['заметка', 'симптомы'],
-            position: { x: 350, y: 400 } // Нижняя правая часть
+            position: { x: 350, y: 400 }
         }
     ];
 
@@ -479,9 +628,9 @@
     let cardStartLeft = 0;
     let cardStartTop = 0;
     let currentFilter = 'all';
+    let currentView = 'graph';
     let animationFrameId = null;
 
-    // Цвета для тегов
     const tagColors = {
         'рентген': '#e6c9a8',
         'грудная клетка': '#d4b68a',
@@ -494,277 +643,15 @@
         'новое': '#e6c9a8'
     };
 
-    // Получение границ области для размещения карточек
-    function getBounds() {
-        const map = document.getElementById('patientMap');
-        const centralCard = document.getElementById('centralCard');
+    // ========== ОБЩИЕ ФУНКЦИИ ==========
 
-        // Получаем реальные размеры контейнера
-        const mapRect = map.getBoundingClientRect();
-        const mapWidth = mapRect.width;
-        const mapHeight = mapRect.height;
-
-        const cardWidth = 280;
-        const cardHeight = 320;
-
-        // Границы в пикселях относительно контейнера (левого верхнего угла map)
-        // Минимальные координаты для левого верхнего угла карточки
-        const minX = 20;
-        const maxX = mapWidth - cardWidth - 20;
-        const minY = 0;
-        const maxY = mapHeight - cardHeight / 2 - 20;
-
-        // Получаем позицию центральной карточки относительно контейнера
-        const centralRect = centralCard.getBoundingClientRect();
-        const centralLeft = centralRect.left - mapRect.left;
-        const centralTop = centralRect.top - mapRect.top;
-        const centralWidth = centralRect.width;
-        const centralHeight = centralRect.height;
-
-        // Центр центральной карточки в координатах контейнера
-        const centerX = centralLeft + centralWidth / 2;
-        const centerY = centralTop + centralHeight / 2;
-
-        return {
-            minX: minX,
-            maxX: maxX,
-            minY: minY,
-            maxY: maxY,
-            centerX: centerX,
-            centerY: centerY,
-            cardWidth: cardWidth,
-            cardHeight: cardHeight
-        };
-    }
-
-    // Проверка пересечения карточек
-    function isOverlapping(pos1, pos2, cardWidth = 280, cardHeight = 320) {
-        const dx = Math.abs(pos1.x - pos2.x);
-        const dy = Math.abs(pos1.y - pos2.y);
-        return dx < cardWidth && dy < cardHeight;
-    }
-
-    // Функция для поиска свободного места
-    function findFreePosition() {
-        const bounds = getBounds();
-        const occupiedPositions = mediaFiles.map(m => ({ x: m.position.x, y: m.position.y }));
-
-        // Пробуем разместить карточки по кругу вокруг центра
-        const angles = [0, 45, 90, 135, 180, 225, 270, 315, 30, 60, 120, 150, 210, 240, 300, 330];
-        const distances = [200, 280, 360, 440];
-
-        // Получаем центр центральной карточки
-        const centerX = bounds.centerX;
-        const centerY = bounds.centerY;
-
-        for (const distance of distances) {
-            for (const angle of angles) {
-                const radian = angle * Math.PI / 180;
-                const x = centerX + Math.cos(radian) * distance - bounds.cardWidth / 2;
-                const y = centerY + Math.sin(radian) * distance - bounds.cardHeight / 2;
-
-                // Проверяем границы
-                if (x < bounds.minX || x > bounds.maxX || y < bounds.minY || y > bounds.maxY) {
-                    continue;
-                }
-
-                // Проверяем пересечения
-                let hasCollision = false;
-                for (const pos of occupiedPositions) {
-                    if (Math.abs(pos.x - x) < bounds.cardWidth && Math.abs(pos.y - y) < bounds.cardHeight) {
-                        hasCollision = true;
-                        break;
-                    }
-                }
-
-                if (!hasCollision) {
-                    return { x, y };
-                }
-            }
-        }
-
-        // Запасной вариант - справа от центра
-        return { x: centerX + 200 - bounds.cardWidth / 2, y: centerY - bounds.cardHeight / 2 };
-    }
-
-    // Функция добавления нового медиафайла
-    function addNewMedia() {
-        const types = [
-            { type: 'photo', icon: '📸', content: 'https://picsum.photos/200/150?random=' + Date.now(), tags: ['новое'] },
-            { type: 'video', icon: '🎥', content: 'https://www.w3schools.com/html/mov_bbb.mp4', tags: ['новое'] },
-            { type: 'audio', icon: '🎵', content: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', tags: ['новое'] },
-            { type: 'text', icon: '📝', content: 'Новая заметка о пациенте...', tags: ['новое'] }
-        ];
-
-        const randomType = types[Math.floor(Math.random() * types.length)];
-        const freePos = findFreePosition();
-
-        const newMedia = {
-            id: nextId++,
-            type: randomType.type,
-            icon: randomType.icon,
-            content: randomType.content,
-            date: new Date().toLocaleString('ru-RU'),
-            note: 'Добавлено сегодня',
-            tags: [...randomType.tags],
-            position: freePos
-        };
-
-        mediaFiles.push(newMedia);
-        renderMediaCards();
-        setTimeout(updateConnections, 50);
-    }
-
-    // Функция рендеринга медиа-карточек
-    function renderMediaCards() {
-        const container = document.getElementById('mediaNodes');
-        container.innerHTML = '';
-
-        const filteredMedia = currentFilter === 'all'
+    function getFilteredMedia() {
+        return currentFilter === 'all'
             ? mediaFiles
             : mediaFiles.filter(m => m.tags.includes(currentFilter));
-
-        filteredMedia.forEach(media => {
-            const card = createMediaCard(media);
-            card.style.left = `${media.position.x}px`;
-            card.style.top = `${media.position.y}px`;
-            card.setAttribute('data-id', media.id);
-
-            makeDraggable(card, media);
-            container.appendChild(card);
-        });
     }
 
-    // Оптимизированный drag-and-drop
-    function makeDraggable(card, media) {
-        let isDragging = false;
-
-        const onMouseMove = (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-
-            const dx = e.clientX - dragStartX;
-            const dy = e.clientY - dragStartY;
-
-            let newLeft = cardStartLeft + dx;
-            let newTop = cardStartTop + dy;
-
-            // Ограничиваем перемещение
-            const bounds = getBounds();
-            newLeft = Math.max(bounds.minX, Math.min(bounds.maxX, newLeft));
-            newTop = Math.max(bounds.minY, Math.min(bounds.maxY, newTop));
-
-            // Обновляем позицию карточки
-            card.style.left = `${newLeft}px`;
-            card.style.top = `${newTop}px`;
-
-            // Обновляем данные
-            media.position = { x: newLeft, y: newTop };
-
-            // Обновляем связи с debounce
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-            }
-            animationFrameId = requestAnimationFrame(() => {
-                updateConnections();
-                animationFrameId = null;
-            });
-        };
-
-        const onMouseUp = () => {
-            if (!isDragging) return;
-            isDragging = false;
-            card.classList.remove('dragging');
-            card.style.cursor = 'grab';
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-        };
-
-        const onMouseDown = (e) => {
-            if (e.target.closest('.tag') || e.target.closest('audio') || e.target.closest('video') || e.target.closest('img')) {
-                return;
-            }
-            e.preventDefault();
-
-            isDragging = true;
-            dragStartX = e.clientX;
-            dragStartY = e.clientY;
-            cardStartLeft = parseFloat(card.style.left);
-            cardStartTop = parseFloat(card.style.top);
-
-            card.classList.add('dragging');
-            card.style.cursor = 'grabbing';
-
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-        };
-
-        card.addEventListener('mousedown', onMouseDown);
-
-        // Для touch устройств
-        const onTouchMove = (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-
-            const touch = e.touches[0];
-            const dx = touch.clientX - dragStartX;
-            const dy = touch.clientY - dragStartY;
-
-            let newLeft = cardStartLeft + dx;
-            let newTop = cardStartTop + dy;
-
-            const bounds = getBounds();
-            newLeft = Math.max(bounds.minX, Math.min(bounds.maxX, newLeft));
-            newTop = Math.max(bounds.minY, Math.min(bounds.maxY, newTop));
-
-            card.style.left = `${newLeft}px`;
-            card.style.top = `${newTop}px`;
-            media.position = { x: newLeft, y: newTop };
-
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-            }
-            animationFrameId = requestAnimationFrame(() => {
-                updateConnections();
-                animationFrameId = null;
-            });
-        };
-
-        const onTouchStart = (e) => {
-            if (e.target.closest('.tag') || e.target.closest('audio') || e.target.closest('video') || e.target.closest('img')) {
-                return;
-            }
-            e.preventDefault();
-
-            const touch = e.touches[0];
-            isDragging = true;
-            dragStartX = touch.clientX;
-            dragStartY = touch.clientY;
-            cardStartLeft = parseFloat(card.style.left);
-            cardStartTop = parseFloat(card.style.top);
-
-            card.classList.add('dragging');
-
-            document.addEventListener('touchmove', onTouchMove, { passive: false });
-            document.addEventListener('touchend', onTouchEnd);
-        };
-
-        const onTouchEnd = () => {
-            if (!isDragging) return;
-            isDragging = false;
-            card.classList.remove('dragging');
-            document.removeEventListener('touchmove', onTouchMove);
-            document.removeEventListener('touchend', onTouchEnd);
-        };
-
-        card.addEventListener('touchstart', onTouchStart, { passive: false });
-    }
-
-    function createMediaCard(media) {
-        const card = document.createElement('div');
-        card.className = 'media-card';
-        card.style.cursor = 'grab';
-
+    function createMediaCardHTML(media, isTimeline = false) {
         let contentHtml = '';
         if (media.type === 'photo') {
             contentHtml = `<img src="${media.content}" alt="Фото" draggable="false">`;
@@ -783,7 +670,7 @@
             </div>
         `).join('');
 
-        card.innerHTML = `
+        return `
             <div class="media-type-icon">${media.icon}</div>
             <div class="media-content">${contentHtml}</div>
             <div class="media-footer">
@@ -792,37 +679,170 @@
                 <div class="tags">${tagsHtml}</div>
             </div>
         `;
-
-        return card;
     }
 
-    // Оптимизированное обновление линий связей
+    // ========== РЕЖИМ КАРТЫ СВЯЗЕЙ ==========
+
+    function getBounds() {
+        const map = document.getElementById('patientMap');
+        const centralCard = document.getElementById('centralCard');
+        const mapRect = map.getBoundingClientRect();
+        const mapWidth = mapRect.width;
+        const mapHeight = mapRect.height;
+        const cardWidth = 280;
+        const cardHeight = 320;
+        const minX = 20;
+        const maxX = mapWidth - cardWidth - 20;
+        const minY = 0;
+        const maxY = mapHeight - cardHeight / 2 - 20;
+        const centralRect = centralCard.getBoundingClientRect();
+        const centralLeft = centralRect.left - mapRect.left;
+        const centralTop = centralRect.top - mapRect.top;
+        const centerX = centralLeft + centralRect.width / 2;
+        const centerY = centralTop + centralRect.height / 2;
+        return { minX, maxX, minY, maxY, centerX, centerY, cardWidth, cardHeight };
+    }
+
+    function findFreePosition() {
+        const bounds = getBounds();
+        const occupiedPositions = mediaFiles.map(m => ({ x: m.position.x, y: m.position.y }));
+        const angles = [0, 45, 90, 135, 180, 225, 270, 315, 30, 60, 120, 150, 210, 240, 300, 330];
+        const distances = [200, 280, 360, 440];
+        for (const distance of distances) {
+            for (const angle of angles) {
+                const radian = angle * Math.PI / 180;
+                const x = bounds.centerX + Math.cos(radian) * distance - bounds.cardWidth / 2;
+                const y = bounds.centerY + Math.sin(radian) * distance - bounds.cardHeight / 2;
+                if (x < bounds.minX || x > bounds.maxX || y < bounds.minY || y > bounds.maxY) continue;
+                let hasCollision = false;
+                for (const pos of occupiedPositions) {
+                    if (Math.abs(pos.x - x) < bounds.cardWidth && Math.abs(pos.y - y) < bounds.cardHeight) {
+                        hasCollision = true;
+                        break;
+                    }
+                }
+                if (!hasCollision) return { x, y };
+            }
+        }
+        return { x: bounds.centerX + 200 - bounds.cardWidth / 2, y: bounds.centerY - bounds.cardHeight / 2 };
+    }
+
+    function renderGraphView() {
+        const container = document.getElementById('mediaNodes');
+        if (!container) return;
+        container.innerHTML = '';
+        const filteredMedia = getFilteredMedia();
+        filteredMedia.forEach(media => {
+            const card = document.createElement('div');
+            card.className = 'media-card';
+            card.style.left = `${media.position.x}px`;
+            card.style.top = `${media.position.y}px`;
+            card.setAttribute('data-id', media.id);
+            card.innerHTML = createMediaCardHTML(media);
+            makeDraggable(card, media);
+            container.appendChild(card);
+        });
+        setTimeout(updateConnections, 50);
+    }
+
+    function makeDraggable(card, media) {
+        let isDragging = false;
+        const onMouseMove = (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const dx = e.clientX - dragStartX;
+            const dy = e.clientY - dragStartY;
+            let newLeft = cardStartLeft + dx;
+            let newTop = cardStartTop + dy;
+            const bounds = getBounds();
+            newLeft = Math.max(bounds.minX, Math.min(bounds.maxX, newLeft));
+            newTop = Math.max(bounds.minY, Math.min(bounds.maxY, newTop));
+            card.style.left = `${newLeft}px`;
+            card.style.top = `${newTop}px`;
+            media.position = { x: newLeft, y: newTop };
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            animationFrameId = requestAnimationFrame(() => { updateConnections(); animationFrameId = null; });
+        };
+        const onMouseUp = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            card.classList.remove('dragging');
+            card.style.cursor = 'grab';
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+        const onMouseDown = (e) => {
+            if (e.target.closest('.tag') || e.target.closest('audio') || e.target.closest('video') || e.target.closest('img')) return;
+            e.preventDefault();
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            cardStartLeft = parseFloat(card.style.left);
+            cardStartTop = parseFloat(card.style.top);
+            card.classList.add('dragging');
+            card.style.cursor = 'grabbing';
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        };
+        card.addEventListener('mousedown', onMouseDown);
+        const onTouchMove = (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const dx = touch.clientX - dragStartX;
+            const dy = touch.clientY - dragStartY;
+            let newLeft = cardStartLeft + dx;
+            let newTop = cardStartTop + dy;
+            const bounds = getBounds();
+            newLeft = Math.max(bounds.minX, Math.min(bounds.maxX, newLeft));
+            newTop = Math.max(bounds.minY, Math.min(bounds.maxY, newTop));
+            card.style.left = `${newLeft}px`;
+            card.style.top = `${newTop}px`;
+            media.position = { x: newLeft, y: newTop };
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            animationFrameId = requestAnimationFrame(() => { updateConnections(); animationFrameId = null; });
+        };
+        const onTouchStart = (e) => {
+            if (e.target.closest('.tag') || e.target.closest('audio') || e.target.closest('video') || e.target.closest('img')) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            isDragging = true;
+            dragStartX = touch.clientX;
+            dragStartY = touch.clientY;
+            cardStartLeft = parseFloat(card.style.left);
+            cardStartTop = parseFloat(card.style.top);
+            card.classList.add('dragging');
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+        };
+        const onTouchEnd = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            card.classList.remove('dragging');
+            document.removeEventListener('touchmove', onTouchMove);
+            document.removeEventListener('touchend', onTouchEnd);
+        };
+        card.addEventListener('touchstart', onTouchStart, { passive: false });
+    }
+
     function updateConnections() {
         const svg = document.querySelector('#connectionsCanvas svg');
         if (!svg) return;
-
         const mapRect = document.getElementById('patientMap').getBoundingClientRect();
         const centralCard = document.getElementById('centralCard');
         const centralRect = centralCard.getBoundingClientRect();
-
         const centralX = centralRect.left + centralRect.width / 2 - mapRect.left;
         const centralY = centralRect.top + centralRect.height / 2 - mapRect.top;
-
         const mediaCards = document.querySelectorAll('.media-card');
         const lines = [];
-
-        // Линии от центра к карточкам
         mediaCards.forEach(card => {
             const cardRect = card.getBoundingClientRect();
             const cardX = cardRect.left + cardRect.width / 2 - mapRect.left;
             const cardY = cardRect.top + cardRect.height / 2 - mapRect.top;
-
             lines.push(`<line x1="${centralX}" y1="${centralY}" x2="${cardX}" y2="${cardY}" class="connection-line"/>`);
         });
-
-        // Линии между карточками с общими тегами
         const cardData = [];
-        mediaCards.forEach((card, i) => {
+        mediaCards.forEach(card => {
             const cardRect = card.getBoundingClientRect();
             const mediaId = parseInt(card.getAttribute('data-id'));
             const media = mediaFiles.find(m => m.id === mediaId);
@@ -835,7 +855,6 @@
                 });
             }
         });
-
         for (let i = 0; i < cardData.length; i++) {
             for (let j = i + 1; j < cardData.length; j++) {
                 if (cardData[i].tags.some(tag => cardData[j].tags.includes(tag))) {
@@ -843,22 +862,90 @@
                 }
             }
         }
-
         svg.innerHTML = lines.join('');
     }
 
-    // Фильтрация по тегам
+    // ========== РЕЖИМ ТАЙМЛАЙН ==========
+
+    function renderTimelineView() {
+        const container = document.getElementById('timelineCards');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const filteredMedia = [...getFilteredMedia()].sort((a, b) => a.dateObj - b.dateObj);
+        if (filteredMedia.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 100px; color: #b99e7c;">Нет медиафайлов для отображения</div>';
+            return;
+        }
+
+        const totalHeight = Math.max(500, filteredMedia.length * 245);
+        const timelineContainer = document.getElementById('timelineContainer');
+        timelineContainer.style.minHeight = `${totalHeight}px`;
+
+
+        filteredMedia.forEach((media, index) => {
+            // Добавляем карточки
+            const side = index % 2 === 0 ? 'left' : 'right';
+            const card = document.createElement('div');
+            card.className = `timeline-card ${side}`;
+            card.setAttribute('data-id', media.id);
+            const topPositionCard = 60 + index * 245;
+            card.style.top = `${topPositionCard}px`;
+            card.innerHTML = createMediaCardHTML(media);
+            container.appendChild(card);
+
+            // Добавляем точки на линию времени кроме последней - там и так жирная точка конца таймлайна
+            if (filteredMedia.length -1 !== index) {
+                const dot = document.createElement('div');
+                dot.className = 'timeline-dot';
+                const topPosition = topPositionCard + 100;
+                dot.style.top = `${topPosition}px`;
+                dot.title = new Date(media.date).toLocaleString('ru-RU');
+                dot.onclick = () => {
+                    const card = document.querySelector(`.timeline-card[data-id="${media.id}"]`);
+                    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                };
+                container.appendChild(dot);
+            }
+        });
+    }
+
+    // ========== ОБЩИЕ ФУНКЦИИ ==========
+
+    function addNewMedia() {
+        const types = [
+            { type: 'photo', icon: '📸', content: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Santiago_cathedral_2021.jpg/960px-Santiago_cathedral_2021.jpg', tags: ['новое'] },
+            { type: 'video', icon: '🎥', content: 'https://www.w3schools.com/html/mov_bbb.mp4', tags: ['новое'] },
+            { type: 'audio', icon: '🎵', content: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', tags: ['новое'] },
+            { type: 'text', icon: '📝', content: 'Новая заметка о пациенте...', tags: ['новое'] }
+        ];
+        const randomType = types[Math.floor(Math.random() * types.length)];
+        const now = new Date();
+        const freePos = findFreePosition();
+        const newMedia = {
+            id: nextId++,
+            type: randomType.type,
+            icon: randomType.icon,
+            content: randomType.content,
+            date: now.toLocaleString('ru-RU'),
+            dateObj: new Date(now),
+            note: 'Добавлено сегодня',
+            tags: [...randomType.tags],
+            position: freePos
+        };
+        mediaFiles.push(newMedia);
+        refreshCurrentView();
+    }
+
     function filterByTag(tag) {
         currentFilter = tag;
-        renderMediaCards();
+        refreshCurrentView();
         updateFiltersUI();
-        setTimeout(updateConnections, 50);
     }
 
     function updateFiltersUI() {
         const filtersDiv = document.getElementById('filters');
         const allTags = ['all', ...new Set(mediaFiles.flatMap(m => m.tags))];
-
         filtersDiv.innerHTML = allTags.map(tag => `
             <span class="filter-tag ${currentFilter === tag ? 'active' : ''}"
                   data-tag="${tag}"
@@ -868,72 +955,66 @@
         `).join('');
     }
 
-    // Обновление при изменении размера
-    let resizeTimeout;
+    function refreshCurrentView() {
+        if (currentView === 'graph') {
+            renderGraphView();
+        } else {
+            renderTimelineView();
+        }
+    }
+
+    function switchView(view) {
+        currentView = view;
+        document.getElementById('graphView').classList.toggle('active', view === 'graph');
+        document.getElementById('timelineView').classList.toggle('active', view === 'timeline');
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-view') === view);
+        });
+        refreshCurrentView();
+    }
+
     function handleResize() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
+        if (currentView === 'graph') {
             const bounds = getBounds();
             let needsUpdate = false;
-
-            // Проверяем, не выходят ли карточки за границы
             mediaFiles.forEach(media => {
-                let changed = false;
-                if (media.position.x < bounds.minX) {
-                    media.position.x = bounds.minX;
-                    changed = true;
-                }
-                if (media.position.x > bounds.maxX) {
-                    media.position.x = bounds.maxX;
-                    changed = true;
-                }
-                if (media.position.y < bounds.minY) {
-                    media.position.y = bounds.minY;
-                    changed = true;
-                }
-                if (media.position.y > bounds.maxY) {
-                    media.position.y = bounds.maxY;
-                    changed = true;
-                }
-                if (changed) needsUpdate = true;
+                if (media.position.x < bounds.minX) { media.position.x = bounds.minX; needsUpdate = true; }
+                if (media.position.x > bounds.maxX) { media.position.x = bounds.maxX; needsUpdate = true; }
+                if (media.position.y < bounds.minY) { media.position.y = bounds.minY; needsUpdate = true; }
+                if (media.position.y > bounds.maxY) { media.position.y = bounds.maxY; needsUpdate = true; }
             });
-
-            if (needsUpdate) {
-                renderMediaCards();
-            }
+            if (needsUpdate) renderGraphView();
             updateConnections();
-        }, 100);
+        }
     }
 
     // Инициализация
     document.addEventListener('DOMContentLoaded', () => {
-        // Корректируем начальные позиции, чтобы они были в пределах экрана
         const bounds = getBounds();
         mediaFiles.forEach(media => {
-            media.position.x = Math.max(bounds.minX, Math.min(bounds.maxX, media.position.x));
-            media.position.y = Math.max(bounds.minY, Math.min(bounds.maxY, media.position.y));
+            if (media.position) {
+                media.position.x = Math.max(bounds.minX, Math.min(bounds.maxX, media.position.x));
+                media.position.y = Math.max(bounds.minY, Math.min(bounds.maxY, media.position.y));
+            }
         });
-
-        renderMediaCards();
+        renderGraphView();
         updateFiltersUI();
-        setTimeout(updateConnections, 50);
 
-        window.addEventListener('resize', handleResize);
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', () => switchView(btn.getAttribute('data-view')));
+        });
 
-        // Наблюдатель за изменениями
+        window.addEventListener('resize', () => {
+            clearTimeout(window.resizeTimeout);
+            window.resizeTimeout = setTimeout(handleResize, 100);
+        });
+
         const observer = new MutationObserver(() => {
-            updateConnections();
+            if (currentView === 'graph') updateConnections();
         });
-
-        observer.observe(document.getElementById('mediaNodes'), {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['style']
-        });
+        observer.observe(document.getElementById('mediaNodes'), { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
     });
 
-    // Глобальные функции
     window.filterByTag = filterByTag;
     window.addNewMedia = addNewMedia;
 </script>
