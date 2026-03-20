@@ -1,75 +1,131 @@
 package com.github.KrotovIV.backend.controllers;
 
+import com.github.KrotovIV.backend.PartialContentResource;
 import com.github.KrotovIV.backend.baseLogging.LoggingDecorator;
 import com.github.KrotovIV.backend.dto.PatientCardDtoResponse;
+import com.github.KrotovIV.backend.services.DataBaseService;
+import com.github.KrotovIV.backend.services.MediaFileService;
+import com.github.KrotovIV.backend.services.VideoStreamingService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
-import java.time.Month;
+
+import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/patients")
+@RequiredArgsConstructor
+@Log
 public class PatientsDataController {
+
+    private final DataBaseService dataBaseService;
+    private final MediaFileService mediaFileService;
+
+    private final VideoStreamingService videoStreamingService;
+
     @LoggingDecorator
     @GetMapping("/list")
     public ResponseEntity<List<PatientCardDtoResponse>> getPatientsCardsList() {
-        // временный хардкод
-        var patientsList = List.of(
-                PatientCardDtoResponse.builder()
-                        .avatar("👴")
-                        .name("Иванов Иван")
-                        .birthDate(LocalDate.of(1954, Month.FEBRUARY, 15))
-                        .condition("Гипертония, артрит")
-                        .lastVisitDate(LocalDate.now().minusDays(3))
-                        .build(),
-
-                PatientCardDtoResponse.builder()
-                        .avatar("\uD83D\uDC75")
-                        .name("Петрова Мария")
-                        .birthDate(LocalDate.of(1975, Month.MARCH, 10))
-                        .condition("Сахарный диабет 2 типа")
-                        .lastVisitDate(LocalDate.now().minusDays(1))
-                        .build(),
-
-                PatientCardDtoResponse.builder()
-                        .avatar("\uD83D\uDC68")
-                        .name("Сидоров Алексей")
-                        .birthDate(LocalDate.of(2000, Month.NOVEMBER, 21))
-                        .condition("Профилактический осмотр")
-                        .lastVisitDate(LocalDate.now().minusWeeks(2))
-                        .build(),
-
-                PatientCardDtoResponse.builder()
-                        .avatar("\uD83D\uDC69")
-                        .name("Козлова Елена")
-                        .birthDate(LocalDate.of(1999, Month.AUGUST, 1))
-                        .condition("Наблюдение, здоров")
-                        .lastVisitDate(LocalDate.now().minusMonths(1))
-                        .build(),
-
-                PatientCardDtoResponse.builder()
-                        .avatar("\uD83D\uDC74")
-                        .name("Николаев Петр")
-                        .birthDate(LocalDate.of(1995, Month.JULY, 11))
-                        .condition("ИБС, ХСН")
-                        .lastVisitDate(LocalDate.now().minusDays(5))
-                        .build(),
-
-
-                PatientCardDtoResponse.builder()
-                        .avatar("\uD83D\uDC75")
-                        .name("Смирнова Анна")
-                        .birthDate(LocalDate.of(1980, Month.OCTOBER, 10))
-                        .condition("Артроз, остеопороз")
-                        .lastVisitDate(LocalDate.now())
-                        .build()
-
-        );
-
+        var patientsList = dataBaseService.getPatients();
         return ResponseEntity.ok(patientsList);
     }
+
+    @GetMapping("/patient/{id}/videos/{videoName}")
+    public ResponseEntity<Resource> streamVideo(
+            @PathVariable("id") Long patientId,
+            @PathVariable("videoName") String videoName,
+            @RequestHeader(value = "Range", required = false) String rangeHeader) {
+
+        log.info("Запрос видео для пациента " + patientId + ": " + videoName);
+
+        // Проверяем существование пациента
+        if (dataBaseService.getPatientById(patientId).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пациент не найден");
+        }
+
+        // Проверяем существование видео
+        if (!videoStreamingService.videoExists(patientId, videoName)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Видео не найдено");
+        }
+
+        try {
+            Resource video = videoStreamingService.getVideoResource(patientId, videoName);
+            String contentType = videoStreamingService.getVideoContentType(videoName);
+            long videoSize = videoStreamingService.getVideoSize(patientId, videoName);
+
+            // Если нет Range заголовка, отдаем весь файл
+            if (rangeHeader == null) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .contentLength(videoSize)
+                        .body(video);
+            }
+
+            // Обработка частичного контента (для стриминга)
+            return handleRangeRequest(video, rangeHeader, contentType, videoSize);
+
+        } catch (IOException e) {
+            log.severe("Ошибка при стриминге видео: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Ошибка при загрузке видео");
+        }
+    }
+
+    /**
+     * Эндпоинт для получения списка доступных видео пациента
+     */
+    @GetMapping("/patient/{id}/videos")
+    public ResponseEntity<List<String>> getPatientVideos(@PathVariable("id") Long patientId) {
+        if (dataBaseService.getPatientById(patientId).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пациент не найден");
+        }
+
+        List<String> videos = videoStreamingService.getAvailableVideos(patientId);
+        return ResponseEntity.ok(videos);
+    }
+
+    private ResponseEntity<Resource> handleRangeRequest(
+            Resource video,
+            String rangeHeader,
+            String contentType,
+            long videoSize) {
+
+        try {
+            // Парсим Range заголовок
+            String[] ranges = rangeHeader.replace("bytes=", "").split("-");
+            long start = Long.parseLong(ranges[0]);
+            long end = ranges.length > 1 ? Long.parseLong(ranges[1]) : videoSize - 1;
+
+            if (start > end || start >= videoSize) {
+                return ResponseEntity.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
+                        .header("Content-Range", "bytes */" + videoSize)
+                        .build();
+            }
+
+            long contentLength = end - start + 1;
+
+            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_RANGE,
+                            String.format("bytes %d-%d/%d", start, end, videoSize))
+                    .contentLength(contentLength)
+                    .body(new PartialContentResource(video, start, end));
+
+        } catch (NumberFormatException e) {
+            log.warning("Некорректный Range заголовок: " + rangeHeader);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .contentLength(videoSize)
+                    .body(video);
+        }
+    }
+
+
 }

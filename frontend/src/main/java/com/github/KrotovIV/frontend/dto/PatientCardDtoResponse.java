@@ -9,6 +9,7 @@ import java.time.LocalDate;
  */
 @Builder
 public record PatientCardDtoResponse(
+    Long id,
     String avatar,
     String name,
     LocalDate birthDate,

@@ -572,8 +572,14 @@
     </div>
 </div>
 
-<script>
-    // Данные медиафайлов с сортировкой по дате для таймлайна
+<script th:inline="javascript">
+    // Получаем список видео из Java
+    const videosFromBackend = /*[[${videos}]]*/ [];
+
+    // ID пациента из Java
+    const patientId = /*[[${patientId}]]*/ 1;
+
+    // Данные медиафайлов - видео будут из бекенда, остальные заглушки
     let mediaFiles = [
         {
             id: 1,
@@ -585,17 +591,6 @@
             note: 'Рентген грудной клетки',
             tags: ['рентген', 'грудная клетка'],
             position: { x: 350, y: 50 }
-        },
-        {
-            id: 2,
-            type: 'video',
-            icon: '🎥',
-            content: 'https://www.w3schools.com/html/mov_bbb.mp4',
-            date: '2024-03-10 11:20',
-            dateObj: new Date(2024, 2, 10, 11, 20),
-            note: 'Видео осмотра',
-            tags: ['осмотр', 'видео'],
-            position: { x: 50, y: 50 }
         },
         {
             id: 3,
@@ -640,10 +635,68 @@
         'жалобы': '#f5e6d3',
         'заметка': '#ffe9d1',
         'симптомы': '#fff0db',
-        'новое': '#e6c9a8'
+        'новое': '#e6c9a8',
+        'ЭКГ': '#e6c9a8',
+        'анализ': '#d4b68a',
+        'УЗИ': '#c4a177',
+        'диагностика': '#b99e7c',
+        'первичный': '#ecd9b4'
     };
 
-    // ========== ОБЩИЕ ФУНКЦИИ ==========
+    // ========== ИНИЦИАЛИЗАЦИЯ ВИДЕО ИЗ БЕКЕНДА ==========
+
+    function initializeVideosFromBackend() {
+        // Преобразуем видео из бекенда в формат mediaFiles
+        const videoMedia = videosFromBackend.map((video, index) => {
+            // Парсим дату
+            let dateObj = new Date();
+            let formattedDate = video.createdAt || '2024-03-20 10:00:00';
+
+            if (formattedDate.includes('-')) {
+                // Формат "2024-03-20 10:00:00"
+                const parts = formattedDate.split(/[- :]/);
+                if (parts.length >= 6) {
+                    dateObj = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4], parts[5]);
+                } else {
+                    dateObj = new Date(formattedDate);
+                }
+            } else {
+                dateObj = new Date(formattedDate);
+            }
+
+            // Форматируем дату для отображения
+            const displayDate = dateObj.toLocaleString('ru-RU');
+
+            return {
+                id: nextId++,
+                type: 'video',
+                icon: '🎥',
+                content: video.streamUrl, // Используем URL для стриминга
+                date: displayDate,
+                dateObj: dateObj,
+                note: video.description || 'Видео пациента',
+                tags: video.tags || ['видео'],
+                position: { x: 50 + (index * 100), y: 50 + (index * 80) },
+                isFromBackend: true,
+                filename: video.filename
+            };
+        });
+
+        // Добавляем видео в начало списка mediaFiles
+        mediaFiles = [...videoMedia, ...mediaFiles];
+
+        // Обновляем позиции для новых видео, чтобы они не накладывались
+        const bounds = getBounds();
+        mediaFiles.forEach(media => {
+            if (media.isFromBackend && media.position && !media.position.adjusted) {
+                const freePos = findFreePosition();
+                media.position = freePos;
+                media.position.adjusted = true;
+            }
+        });
+    }
+
+    // ========== ОСТАЛЬНЫЕ ФУНКЦИИ (без изменений) ==========
 
     function getFilteredMedia() {
         return currentFilter === 'all'
@@ -656,7 +709,10 @@
         if (media.type === 'photo') {
             contentHtml = `<img src="${media.content}" alt="Фото" draggable="false">`;
         } else if (media.type === 'video') {
-            contentHtml = `<video controls><source src="${media.content}" type="video/mp4"></video>`;
+            contentHtml = `<video controls preload="metadata">
+                            <source src="${media.content}" type="video/mp4">
+                            Ваш браузер не поддерживает видео.
+                           </video>`;
         } else if (media.type === 'audio') {
             contentHtml = `<audio controls><source src="${media.content}" type="audio/mpeg"></audio>`;
         } else if (media.type === 'text') {
@@ -686,6 +742,8 @@
     function getBounds() {
         const map = document.getElementById('patientMap');
         const centralCard = document.getElementById('centralCard');
+        if (!map || !centralCard) return { minX: 20, maxX: 800, minY: 0, maxY: 400, centerX: 400, centerY: 350, cardWidth: 280, cardHeight: 320 };
+
         const mapRect = map.getBoundingClientRect();
         const mapWidth = mapRect.width;
         const mapHeight = mapRect.height;
@@ -705,7 +763,7 @@
 
     function findFreePosition() {
         const bounds = getBounds();
-        const occupiedPositions = mediaFiles.map(m => ({ x: m.position.x, y: m.position.y }));
+        const occupiedPositions = mediaFiles.map(m => ({ x: m.position?.x || 0, y: m.position?.y || 0 }));
         const angles = [0, 45, 90, 135, 180, 225, 270, 315, 30, 60, 120, 150, 210, 240, 300, 330];
         const distances = [200, 280, 360, 440];
         for (const distance of distances) {
@@ -733,6 +791,9 @@
         container.innerHTML = '';
         const filteredMedia = getFilteredMedia();
         filteredMedia.forEach(media => {
+            if (!media.position) {
+                media.position = findFreePosition();
+            }
             const card = document.createElement('div');
             card.className = 'media-card';
             card.style.left = `${media.position.x}px`;
@@ -828,8 +889,11 @@
     function updateConnections() {
         const svg = document.querySelector('#connectionsCanvas svg');
         if (!svg) return;
-        const mapRect = document.getElementById('patientMap').getBoundingClientRect();
+        const map = document.getElementById('patientMap');
+        if (!map) return;
+        const mapRect = map.getBoundingClientRect();
         const centralCard = document.getElementById('centralCard');
+        if (!centralCard) return;
         const centralRect = centralCard.getBoundingClientRect();
         const centralX = centralRect.left + centralRect.width / 2 - mapRect.left;
         const centralY = centralRect.top + centralRect.height / 2 - mapRect.top;
@@ -872,7 +936,7 @@
         if (!container) return;
         container.innerHTML = '';
 
-        const filteredMedia = [...getFilteredMedia()].sort((a, b) => a.dateObj - b.dateObj);
+        const filteredMedia = [...getFilteredMedia()].sort((a, b) => (a.dateObj?.getTime() || 0) - (b.dateObj?.getTime() || 0));
         if (filteredMedia.length === 0) {
             container.innerHTML = '<div style="text-align: center; padding: 100px; color: #b99e7c;">Нет медиафайлов для отображения</div>';
             return;
@@ -880,11 +944,11 @@
 
         const totalHeight = Math.max(500, filteredMedia.length * 245);
         const timelineContainer = document.getElementById('timelineContainer');
-        timelineContainer.style.minHeight = `${totalHeight}px`;
-
+        if (timelineContainer) {
+            timelineContainer.style.minHeight = `${totalHeight}px`;
+        }
 
         filteredMedia.forEach((media, index) => {
-            // Добавляем карточки
             const side = index % 2 === 0 ? 'left' : 'right';
             const card = document.createElement('div');
             card.className = `timeline-card ${side}`;
@@ -894,13 +958,12 @@
             card.innerHTML = createMediaCardHTML(media);
             container.appendChild(card);
 
-            // Добавляем точки на линию времени кроме последней - там и так жирная точка конца таймлайна
-            if (filteredMedia.length -1 !== index) {
+            if (filteredMedia.length - 1 !== index) {
                 const dot = document.createElement('div');
                 dot.className = 'timeline-dot';
                 const topPosition = topPositionCard + 100;
                 dot.style.top = `${topPosition}px`;
-                dot.title = new Date(media.date).toLocaleString('ru-RU');
+                dot.title = media.date ? new Date(media.date).toLocaleString('ru-RU') : '';
                 dot.onclick = () => {
                     const card = document.querySelector(`.timeline-card[data-id="${media.id}"]`);
                     if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -935,6 +998,7 @@
         };
         mediaFiles.push(newMedia);
         refreshCurrentView();
+        updateFiltersUI();
     }
 
     function filterByTag(tag) {
@@ -945,6 +1009,7 @@
 
     function updateFiltersUI() {
         const filtersDiv = document.getElementById('filters');
+        if (!filtersDiv) return;
         const allTags = ['all', ...new Set(mediaFiles.flatMap(m => m.tags))];
         filtersDiv.innerHTML = allTags.map(tag => `
             <span class="filter-tag ${currentFilter === tag ? 'active' : ''}"
@@ -965,8 +1030,10 @@
 
     function switchView(view) {
         currentView = view;
-        document.getElementById('graphView').classList.toggle('active', view === 'graph');
-        document.getElementById('timelineView').classList.toggle('active', view === 'timeline');
+        const graphView = document.getElementById('graphView');
+        const timelineView = document.getElementById('timelineView');
+        if (graphView) graphView.classList.toggle('active', view === 'graph');
+        if (timelineView) timelineView.classList.toggle('active', view === 'timeline');
         document.querySelectorAll('.view-btn').forEach(btn => {
             btn.classList.toggle('active', btn.getAttribute('data-view') === view);
         });
@@ -978,10 +1045,12 @@
             const bounds = getBounds();
             let needsUpdate = false;
             mediaFiles.forEach(media => {
-                if (media.position.x < bounds.minX) { media.position.x = bounds.minX; needsUpdate = true; }
-                if (media.position.x > bounds.maxX) { media.position.x = bounds.maxX; needsUpdate = true; }
-                if (media.position.y < bounds.minY) { media.position.y = bounds.minY; needsUpdate = true; }
-                if (media.position.y > bounds.maxY) { media.position.y = bounds.maxY; needsUpdate = true; }
+                if (media.position) {
+                    if (media.position.x < bounds.minX) { media.position.x = bounds.minX; needsUpdate = true; }
+                    if (media.position.x > bounds.maxX) { media.position.x = bounds.maxX; needsUpdate = true; }
+                    if (media.position.y < bounds.minY) { media.position.y = bounds.minY; needsUpdate = true; }
+                    if (media.position.y > bounds.maxY) { media.position.y = bounds.maxY; needsUpdate = true; }
+                }
             });
             if (needsUpdate) renderGraphView();
             updateConnections();
@@ -990,6 +1059,9 @@
 
     // Инициализация
     document.addEventListener('DOMContentLoaded', () => {
+        // Инициализируем видео из бекенда
+        initializeVideosFromBackend();
+
         const bounds = getBounds();
         mediaFiles.forEach(media => {
             if (media.position) {
@@ -997,6 +1069,7 @@
                 media.position.y = Math.max(bounds.minY, Math.min(bounds.maxY, media.position.y));
             }
         });
+
         renderGraphView();
         updateFiltersUI();
 
@@ -1012,7 +1085,10 @@
         const observer = new MutationObserver(() => {
             if (currentView === 'graph') updateConnections();
         });
-        observer.observe(document.getElementById('mediaNodes'), { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+        const mediaNodes = document.getElementById('mediaNodes');
+        if (mediaNodes) {
+            observer.observe(mediaNodes, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+        }
     });
 
     window.filterByTag = filterByTag;
