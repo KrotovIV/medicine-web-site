@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Карта пациента - Медицинский кабинет</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #faf7f0;
+            background-image: radial-gradient(#e0d5c0 1px, transparent 1px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding: 30px 20px;
+            overflow-x: auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Шапка */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 15px 25px;
+            background-color: rgba(255, 248, 235, 0.9);
+            border-radius: 30px;
+            box-shadow: 0 8px 20px rgba(180, 150, 100, 0.15);
+            border: 2px solid #ecd9b4;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 2px dashed #d4b68a;
+            border-radius: 25px;
+            pointer-events: none;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #a77b4f;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 10px 20px;
+            background-color: #fff0db;
+            border: 2px solid #ecd9b4;
+            border-radius: 50px;
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            background-color: #ffe9d1;
+            transform: translateX(-3px);
+            border-color: #dbbd95;
+        }
+
+        .patient-badge {
+            background-color: #fff0db;
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 2px solid #ecd9b4;
+            color: #7d5e3a;
+            font-weight: 500;
+        }
+
+        /* Фильтры */
+        .filters {
+            background-color: #fffaf0;
+            border: 3px solid #ecd9b4;
+            border-radius: 50px;
+            padding: 15px 25px;
+            margin-bottom: 40px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            background-color: #fff0db;
+            border: 2px solid #ecd9b4;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #7d5e3a;
+            font-weight: 500;
+        }
+
+        .filter-tag.active {
+            background-color: #e6c9a8;
+            border-color: #c4a177;
+            color: #5f4a2e;
+        }
+
+        .filter-tag:hover {
+            transform: translateY(-2px);
+            border-color: #dbbd95;
+        }
+
+        /* Основной контент */
+        .patient-map {
+            position: relative;
+            min-height: 700px;
+            margin: 40px 0;
+            background: rgba(255, 248, 235, 0.3);
+            border-radius: 60px;
+            overflow: visible;
+        }
+
+        /* Центральная карточка пациента */
+        .central-card {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            width: 280px;
+            background: linear-gradient(145deg, #fffaf0, #fff5e8);
+            border: 4px solid #e6c9a8;
+            border-radius: 50px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 15px 30px rgba(170, 140, 100, 0.25);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .central-card:hover {
+            transform: translate(-50%, -50%) scale(1.02);
+            box-shadow: 0 20px 40px rgba(170, 140, 100, 0.3);
+        }
+
+        .patient-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(145deg, #fff5e8, #f5e6d3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 55px;
+            margin: 0 auto 15px;
+            border: 4px solid #e6c9a8;
+            box-shadow: 0 8px 0 #d2b48c;
+        }
+
+        .patient-name {
+            font-size: 1.8rem;
+            color: #7d5e3a;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .patient-age {
+            color: #a77b4f;
+            font-size: 1.1rem;
+            background-color: #fff0db;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 40px;
+            border: 2px solid #ecd9b4;
+        }
+
+        /* Контейнер для медиа-карточек */
+        .media-nodes {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 700px;
+            z-index: 5;
+        }
+
+        .media-card {
+            position: absolute;
+            width: 280px;
+            background: #fffaf0;
+            border: 3px solid #ecd9b4;
+            border-radius: 30px;
+            padding: 15px;
+            cursor: grab;
+            transition: box-shadow 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            z-index: 20;
+            will-change: left, top;
+        }
+
+        .media-card:active {
+            cursor: grabbing;
+        }
+
+        .media-card.dragging {
+            opacity: 0.8;
+            cursor: grabbing;
+            z-index: 1000;
+            transition: none;
+        }
+
+        .media-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(170, 140, 100, 0.2);
+            border-color: #dbbd95;
+        }
+
+        /* Типы медиафайлов */
+        .media-type-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .media-content {
+            margin: 10px 0;
+        }
+
+        .media-content img, .media-content video {
+            width: 100%;
+            border-radius: 20px;
+            border: 2px solid #ecd9b4;
+        }
+
+        .media-content audio {
+            width: 100%;
+        }
+
+        .text-note {
+            background-color: #fff5e8;
+            padding: 10px;
+            border-radius: 20px;
+            border-left: 4px solid #e6c9a8;
+            font-style: italic;
+            color: #5f4a2e;
+            font-size: 0.9rem;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .media-footer {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 2px dashed #ecd9b4;
+            font-size: 0.7rem;
+            color: #b99e7c;
+        }
+
+        .media-date {
+            margin-bottom: 8px;
+        }
+
+        .note-field {
+            margin: 8px 0;
+            padding: 5px;
+            background-color: #fff9f0;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: #7d5e3a;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: #fff0db;
+        }
+
+        .tag:hover {
+            transform: scale(1.05);
+            background-color: #ffe9d1;
+        }
+
+        .tag-circle {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* SVG для связей */
+        .connections-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .connections-canvas svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .connection-line {
+            stroke: #dbbd95;
+            stroke-width: 2;
+            stroke-dasharray: 5 5;
+            fill: none;
+        }
+
+        /* Кнопка добавления */
+        .add-media-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #fff0db;
+            border: 3px solid #dbbd95;
+            border-radius: 60px;
+            padding: 15px 30px;
+            color: #a77b4f;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #d2b48c;
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .add-media-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 #c4a177;
+        }
+
+        @media (max-width: 768px) {
+            .media-card {
+                position: relative !important;
+                margin: 20px auto;
+                transform: none !important;
+                left: auto !important;
+                top: auto !important;
+            }
+            .media-nodes {
+                min-height: auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .connections-canvas {
+                display: none;
+            }
+            .central-card {
+                position: relative;
+                margin: 20px auto;
+                transform: none;
+            }
+            .patient-map {
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Шапка -->
+    <div class="header">
+        <a href="/" class="back-link">
+            ← На главную
+        </a>
+        <div class="patient-badge">
+            👨‍⚕️ <span th:text="${username}">Доктор</span>
+        </div>
+    </div>
+
+    <!-- Фильтры по тегам -->
+    <div class="filters" id="filters">
+        <span class="filter-tag active" data-tag="all">📋 Все</span>
+    </div>
+
+    <!-- Карта пациента -->
+    <div class="patient-map" id="patientMap">
+        <!-- Центральная карточка пациента -->
+        <div class="central-card" id="centralCard">
+            <div class="patient-avatar">👴</div>
+            <div class="patient-name">Иван Иванов</div>
+            <div class="patient-age">72 года</div>
+            <div class="patient-age" style="margin-top: 8px;">📅 15.03.1954</div>
+        </div>
+
+        <!-- Контейнер для медиа-карточек -->
+        <div class="media-nodes" id="mediaNodes"></div>
+
+        <!-- SVG для линий связей -->
+        <div class="connections-canvas" id="connectionsCanvas">
+            <svg></svg>
+        </div>
+    </div>
+
+    <!-- Кнопка добавления медиафайла -->
+    <div class="add-media-btn" onclick="addNewMedia()">
+        ➕ Добавить медиафайл
+    </div>
+</div>
+
+<script>
+    // Данные медиафайлов
+    // Исправленные начальные позиции медиафайлов
+    let mediaFiles = [
+        {
+            id: 1,
+            type: 'photo',
+            icon: '📸',
+            content: 'https://picsum.photos/200/150?random=1',
+            date: '2024-03-15 14:30',
+            note: 'Рентген грудной клетки',
+            tags: ['рентген', 'грудная клетка'],
+            position: { x: 350, y: 50 }  // Правая сторона
+        },
+        {
+            id: 2,
+            type: 'video',
+            icon: '🎥',
+            content: 'https://www.w3schools.com/html/mov_bbb.mp4',
+            date: '2024-03-10 11:20',
+            note: 'Видео осмотра',
+            tags: ['осмотр', 'видео'],
+            position: { x: 50, y: 50 }   // Левая сторона
+        },
+        {
+            id: 3,
+            type: 'audio',
+            icon: '🎵',
+            content: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+            date: '2024-03-05 09:15',
+            note: 'Запись голоса пациента',
+            tags: ['голос', 'жалобы'],
+            position: { x: 50, y: 400 }  // Нижняя левая часть
+        },
+        {
+            id: 4,
+            type: 'text',
+            icon: '📝',
+            content: 'Жалобы на боли в области сердца, одышку при нагрузке. Рекомендовано: ЭКГ, консультация кардиолога.',
+            date: '2024-03-01 16:45',
+            note: 'Заметка врача',
+            tags: ['заметка', 'симптомы'],
+            position: { x: 350, y: 400 } // Нижняя правая часть
+        }
+    ];
+
+    let nextId = 5;
+    let draggedCard = null;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let cardStartLeft = 0;
+    let cardStartTop = 0;
+    let currentFilter = 'all';
+    let animationFrameId = null;
+
+    // Цвета для тегов
+    const tagColors = {
+        'рентген': '#e6c9a8',
+        'грудная клетка': '#d4b68a',
+        'осмотр': '#c4a177',
+        'видео': '#b99e7c',
+        'голос': '#ecd9b4',
+        'жалобы': '#f5e6d3',
+        'заметка': '#ffe9d1',
+        'симптомы': '#fff0db',
+        'новое': '#e6c9a8'
+    };
+
+    // Получение границ области для размещения карточек
+    function getBounds() {
+        const map = document.getElementById('patientMap');
+        const centralCard = document.getElementById('centralCard');
+
+        // Получаем реальные размеры контейнера
+        const mapRect = map.getBoundingClientRect();
+        const mapWidth = mapRect.width;
+        const mapHeight = mapRect.height;
+
+        const cardWidth = 280;
+        const cardHeight = 320;
+
+        // Границы в пикселях относительно контейнера (левого верхнего угла map)
+        // Минимальные координаты для левого верхнего угла карточки
+        const minX = 20;
+        const maxX = mapWidth - cardWidth - 20;
+        const minY = 0;
+        const maxY = mapHeight - cardHeight / 2 - 20;
+
+        // Получаем позицию центральной карточки относительно контейнера
+        const centralRect = centralCard.getBoundingClientRect();
+        const centralLeft = centralRect.left - mapRect.left;
+        const centralTop = centralRect.top - mapRect.top;
+        const centralWidth = centralRect.width;
+        const centralHeight = centralRect.height;
+
+        // Центр центральной карточки в координатах контейнера
+        const centerX = centralLeft + centralWidth / 2;
+        const centerY = centralTop + centralHeight / 2;
+
+        return {
+            minX: minX,
+            maxX: maxX,
+            minY: minY,
+            maxY: maxY,
+            centerX: centerX,
+            centerY: centerY,
+            cardWidth: cardWidth,
+            cardHeight: cardHeight
+        };
+    }
+
+    // Проверка пересечения карточек
+    function isOverlapping(pos1, pos2, cardWidth = 280, cardHeight = 320) {
+        const dx = Math.abs(pos1.x - pos2.x);
+        const dy = Math.abs(pos1.y - pos2.y);
+        return dx < cardWidth && dy < cardHeight;
+    }
+
+    // Функция для поиска свободного места
+    function findFreePosition() {
+        const bounds = getBounds();
+        const occupiedPositions = mediaFiles.map(m => ({ x: m.position.x, y: m.position.y }));
+
+        // Пробуем разместить карточки по кругу вокруг центра
+        const angles = [0, 45, 90, 135, 180, 225, 270, 315, 30, 60, 120, 150, 210, 240, 300, 330];
+        const distances = [200, 280, 360, 440];
+
+        // Получаем центр центральной карточки
+        const centerX = bounds.centerX;
+        const centerY = bounds.centerY;
+
+        for (const distance of distances) {
+            for (const angle of angles) {
+                const radian = angle * Math.PI / 180;
+                const x = centerX + Math.cos(radian) * distance - bounds.cardWidth / 2;
+                const y = centerY + Math.sin(radian) * distance - bounds.cardHeight / 2;
+
+                // Проверяем границы
+                if (x < bounds.minX || x > bounds.maxX || y < bounds.minY || y > bounds.maxY) {
+                    continue;
+                }
+
+                // Проверяем пересечения
+                let hasCollision = false;
+                for (const pos of occupiedPositions) {
+                    if (Math.abs(pos.x - x) < bounds.cardWidth && Math.abs(pos.y - y) < bounds.cardHeight) {
+                        hasCollision = true;
+                        break;
+                    }
+                }
+
+                if (!hasCollision) {
+                    return { x, y };
+                }
+            }
+        }
+
+        // Запасной вариант - справа от центра
+        return { x: centerX + 200 - bounds.cardWidth / 2, y: centerY - bounds.cardHeight / 2 };
+    }
+
+    // Функция добавления нового медиафайла
+    function addNewMedia() {
+        const types = [
+            { type: 'photo', icon: '📸', content: 'https://picsum.photos/200/150?random=' + Date.now(), tags: ['новое'] },
+            { type: 'video', icon: '🎥', content: 'https://www.w3schools.com/html/mov_bbb.mp4', tags: ['новое'] },
+            { type: 'audio', icon: '🎵', content: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', tags: ['новое'] },
+            { type: 'text', icon: '📝', content: 'Новая заметка о пациенте...', tags: ['новое'] }
+        ];
+
+        const randomType = types[Math.floor(Math.random() * types.length)];
+        const freePos = findFreePosition();
+
+        const newMedia = {
+            id: nextId++,
+            type: randomType.type,
+            icon: randomType.icon,
+            content: randomType.content,
+            date: new Date().toLocaleString('ru-RU'),
+            note: 'Добавлено сегодня',
+            tags: [...randomType.tags],
+            position: freePos
+        };
+
+        mediaFiles.push(newMedia);
+        renderMediaCards();
+        setTimeout(updateConnections, 50);
+    }
+
+    // Функция рендеринга медиа-карточек
+    function renderMediaCards() {
+        const container = document.getElementById('mediaNodes');
+        container.innerHTML = '';
+
+        const filteredMedia = currentFilter === 'all'
+            ? mediaFiles
+            : mediaFiles.filter(m => m.tags.includes(currentFilter));
+
+        filteredMedia.forEach(media => {
+            const card = createMediaCard(media);
+            card.style.left = `${media.position.x}px`;
+            card.style.top = `${media.position.y}px`;
+            card.setAttribute('data-id', media.id);
+
+            makeDraggable(card, media);
+            container.appendChild(card);
+        });
+    }
+
+    // Оптимизированный drag-and-drop
+    function makeDraggable(card, media) {
+        let isDragging = false;
+
+        const onMouseMove = (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            const dx = e.clientX - dragStartX;
+            const dy = e.clientY - dragStartY;
+
+            let newLeft = cardStartLeft + dx;
+            let newTop = cardStartTop + dy;
+
+            // Ограничиваем перемещение
+            const bounds = getBounds();
+            newLeft = Math.max(bounds.minX, Math.min(bounds.maxX, newLeft));
+            newTop = Math.max(bounds.minY, Math.min(bounds.maxY, newTop));
+
+            // Обновляем позицию карточки
+            card.style.left = `${newLeft}px`;
+            card.style.top = `${newTop}px`;
+
+            // Обновляем данные
+            media.position = { x: newLeft, y: newTop };
+
+            // Обновляем связи с debounce
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            animationFrameId = requestAnimationFrame(() => {
+                updateConnections();
+                animationFrameId = null;
+            });
+        };
+
+        const onMouseUp = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            card.classList.remove('dragging');
+            card.style.cursor = 'grab';
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+
+        const onMouseDown = (e) => {
+            if (e.target.closest('.tag') || e.target.closest('audio') || e.target.closest('video') || e.target.closest('img')) {
+                return;
+            }
+            e.preventDefault();
+
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            cardStartLeft = parseFloat(card.style.left);
+            cardStartTop = parseFloat(card.style.top);
+
+            card.classList.add('dragging');
+            card.style.cursor = 'grabbing';
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        };
+
+        card.addEventListener('mousedown', onMouseDown);
+
+        // Для touch устройств
+        const onTouchMove = (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            const touch = e.touches[0];
+            const dx = touch.clientX - dragStartX;
+            const dy = touch.clientY - dragStartY;
+
+            let newLeft = cardStartLeft + dx;
+            let newTop = cardStartTop + dy;
+
+            const bounds = getBounds();
+            newLeft = Math.max(bounds.minX, Math.min(bounds.maxX, newLeft));
+            newTop = Math.max(bounds.minY, Math.min(bounds.maxY, newTop));
+
+            card.style.left = `${newLeft}px`;
+            card.style.top = `${newTop}px`;
+            media.position = { x: newLeft, y: newTop };
+
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            animationFrameId = requestAnimationFrame(() => {
+                updateConnections();
+                animationFrameId = null;
+            });
+        };
+
+        const onTouchStart = (e) => {
+            if (e.target.closest('.tag') || e.target.closest('audio') || e.target.closest('video') || e.target.closest('img')) {
+                return;
+            }
+            e.preventDefault();
+
+            const touch = e.touches[0];
+            isDragging = true;
+            dragStartX = touch.clientX;
+            dragStartY = touch.clientY;
+            cardStartLeft = parseFloat(card.style.left);
+            cardStartTop = parseFloat(card.style.top);
+
+            card.classList.add('dragging');
+
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+        };
+
+        const onTouchEnd = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            card.classList.remove('dragging');
+            document.removeEventListener('touchmove', onTouchMove);
+            document.removeEventListener('touchend', onTouchEnd);
+        };
+
+        card.addEventListener('touchstart', onTouchStart, { passive: false });
+    }
+
+    function createMediaCard(media) {
+        const card = document.createElement('div');
+        card.className = 'media-card';
+        card.style.cursor = 'grab';
+
+        let contentHtml = '';
+        if (media.type === 'photo') {
+            contentHtml = `<img src="${media.content}" alt="Фото" draggable="false">`;
+        } else if (media.type === 'video') {
+            contentHtml = `<video controls><source src="${media.content}" type="video/mp4"></video>`;
+        } else if (media.type === 'audio') {
+            contentHtml = `<audio controls><source src="${media.content}" type="audio/mpeg"></audio>`;
+        } else if (media.type === 'text') {
+            contentHtml = `<div class="text-note">${media.content}</div>`;
+        }
+
+        const tagsHtml = media.tags.map(tag => `
+            <div class="tag" data-tag="${tag}" onclick="event.stopPropagation(); filterByTag('${tag}')">
+                <span class="tag-circle" style="background-color: ${tagColors[tag] || '#e6c9a8'};"></span>
+                ${tag}
+            </div>
+        `).join('');
+
+        card.innerHTML = `
+            <div class="media-type-icon">${media.icon}</div>
+            <div class="media-content">${contentHtml}</div>
+            <div class="media-footer">
+                <div class="media-date">🕒 ${media.date}</div>
+                ${media.note ? `<div class="note-field">📌 ${media.note}</div>` : ''}
+                <div class="tags">${tagsHtml}</div>
+            </div>
+        `;
+
+        return card;
+    }
+
+    // Оптимизированное обновление линий связей
+    function updateConnections() {
+        const svg = document.querySelector('#connectionsCanvas svg');
+        if (!svg) return;
+
+        const mapRect = document.getElementById('patientMap').getBoundingClientRect();
+        const centralCard = document.getElementById('centralCard');
+        const centralRect = centralCard.getBoundingClientRect();
+
+        const centralX = centralRect.left + centralRect.width / 2 - mapRect.left;
+        const centralY = centralRect.top + centralRect.height / 2 - mapRect.top;
+
+        const mediaCards = document.querySelectorAll('.media-card');
+        const lines = [];
+
+        // Линии от центра к карточкам
+        mediaCards.forEach(card => {
+            const cardRect = card.getBoundingClientRect();
+            const cardX = cardRect.left + cardRect.width / 2 - mapRect.left;
+            const cardY = cardRect.top + cardRect.height / 2 - mapRect.top;
+
+            lines.push(`<line x1="${centralX}" y1="${centralY}" x2="${cardX}" y2="${cardY}" class="connection-line"/>`);
+        });
+
+        // Линии между карточками с общими тегами
+        const cardData = [];
+        mediaCards.forEach((card, i) => {
+            const cardRect = card.getBoundingClientRect();
+            const mediaId = parseInt(card.getAttribute('data-id'));
+            const media = mediaFiles.find(m => m.id === mediaId);
+            if (media) {
+                cardData.push({
+                    id: mediaId,
+                    x: cardRect.left + cardRect.width / 2 - mapRect.left,
+                    y: cardRect.top + cardRect.height / 2 - mapRect.top,
+                    tags: media.tags
+                });
+            }
+        });
+
+        for (let i = 0; i < cardData.length; i++) {
+            for (let j = i + 1; j < cardData.length; j++) {
+                if (cardData[i].tags.some(tag => cardData[j].tags.includes(tag))) {
+                    lines.push(`<line x1="${cardData[i].x}" y1="${cardData[i].y}" x2="${cardData[j].x}" y2="${cardData[j].y}" class="connection-line" style="stroke: #c4a177; stroke-dasharray: 3 3;"/>`);
+                }
+            }
+        }
+
+        svg.innerHTML = lines.join('');
+    }
+
+    // Фильтрация по тегам
+    function filterByTag(tag) {
+        currentFilter = tag;
+        renderMediaCards();
+        updateFiltersUI();
+        setTimeout(updateConnections, 50);
+    }
+
+    function updateFiltersUI() {
+        const filtersDiv = document.getElementById('filters');
+        const allTags = ['all', ...new Set(mediaFiles.flatMap(m => m.tags))];
+
+        filtersDiv.innerHTML = allTags.map(tag => `
+            <span class="filter-tag ${currentFilter === tag ? 'active' : ''}"
+                  data-tag="${tag}"
+                  onclick="filterByTag('${tag}')">
+                ${tag === 'all' ? '📋 Все' : `🏷️ ${tag}`}
+            </span>
+        `).join('');
+    }
+
+    // Обновление при изменении размера
+    let resizeTimeout;
+    function handleResize() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            const bounds = getBounds();
+            let needsUpdate = false;
+
+            // Проверяем, не выходят ли карточки за границы
+            mediaFiles.forEach(media => {
+                let changed = false;
+                if (media.position.x < bounds.minX) {
+                    media.position.x = bounds.minX;
+                    changed = true;
+                }
+                if (media.position.x > bounds.maxX) {
+                    media.position.x = bounds.maxX;
+                    changed = true;
+                }
+                if (media.position.y < bounds.minY) {
+                    media.position.y = bounds.minY;
+                    changed = true;
+                }
+                if (media.position.y > bounds.maxY) {
+                    media.position.y = bounds.maxY;
+                    changed = true;
+                }
+                if (changed) needsUpdate = true;
+            });
+
+            if (needsUpdate) {
+                renderMediaCards();
+            }
+            updateConnections();
+        }, 100);
+    }
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', () => {
+        // Корректируем начальные позиции, чтобы они были в пределах экрана
+        const bounds = getBounds();
+        mediaFiles.forEach(media => {
+            media.position.x = Math.max(bounds.minX, Math.min(bounds.maxX, media.position.x));
+            media.position.y = Math.max(bounds.minY, Math.min(bounds.maxY, media.position.y));
+        });
+
+        renderMediaCards();
+        updateFiltersUI();
+        setTimeout(updateConnections, 50);
+
+        window.addEventListener('resize', handleResize);
+
+        // Наблюдатель за изменениями
+        const observer = new MutationObserver(() => {
+            updateConnections();
+        });
+
+        observer.observe(document.getElementById('mediaNodes'), {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['style']
+        });
+    });
+
+    // Глобальные функции
+    window.filterByTag = filterByTag;
+    window.addNewMedia = addNewMedia;
+</script>
+</body>
+</html>

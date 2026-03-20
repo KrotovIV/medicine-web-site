@@ -145,6 +145,7 @@
             align-items: center;
             text-align: center;
             backdrop-filter: blur(2px);
+            text-decoration: none;
         }
 
         .patient-card:hover {
@@ -312,14 +313,14 @@
         <!-- Сетка с карточками пациентов (хардкод для примера) -->
         <div class="patients-grid">
             <!-- Список всех пациентов -->
-            <div th:each="patient : ${patients}" class="patient-card" onclick="alert('Страница пациента (в разработке)')">
+            <a th:each="patient : ${patients}" class="patient-card" href="/patient">
                 <div class="card-decoration"></div>
                 <div class="patient-avatar" th:text="${patient.avatar}">$avatar$</div>
                 <div class="patient-name" th:text="${patient.name}">$name$</div>
                 <div class="patient-age" th:text="${patient.age}">$age$</div>
                 <div class="patient-condition" th:text="${patient.condition}">$condition$</div>
                 <div class="last-visit" th:text="|🩺 Последний визит: ${patient.lastVisitDate}|">$last_visit$</div>
-            </div>
+            </a>
         </div>
 
         <!-- Кнопка добавления нового пациента (заглушка) -->
