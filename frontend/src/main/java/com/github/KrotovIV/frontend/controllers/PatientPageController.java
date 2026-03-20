@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -56,22 +57,23 @@ public class PatientPageController {
 
             System.out.println("url: " + url);
 
-//            var response = restTemplate.getForEntity(url, VideoInfo[].class);
-//
-//            System.out.println("response: " + response);
-
-            var videoFileNames = webClient.get()
+            // Используем String[].class вместо String.class
+            String[] videoFileNames = webClient.get()
                     .uri(url)
                     .retrieve()
-                    .bodyToFlux(String.class)
-                    .collectList()
+                    .bodyToMono(String[].class)  // Изменено с bodyToFlux на bodyToMono
                     .block();
 
-            System.out.println(videoFileNames);
+            System.out.println("videoFileNames: " + Arrays.toString(videoFileNames));
 
-            List<VideoInfo> videos = videoFileNames.stream().map(
+            if (videoFileNames == null || videoFileNames.length == 0) {
+                return new ArrayList<>();
+            }
+
+            List<VideoInfo> videos = Arrays.stream(videoFileNames).map(
                     filename -> VideoInfo.builder()
-                            .streamUrl("http://127.0.0.1:8081/api/patients/patient/1/videos/video1.mp4")
+                            .filename(filename)
+                            .streamUrl("http://127.0.0.1:8081/api/patients/patient/1/videos/" + filename)
                             .createdAt("2024-03-20 10:00:00")
                             .description("Видео пациента")
                             .tags(List.of("видео"))
@@ -80,27 +82,9 @@ public class PatientPageController {
 
             return videos;
 
-//            if (response.getBody() != null) {
-//                List<VideoInfo> videos = List.of(response.getBody());
-//                // Добавляем URL для стриминга к каждому видео
-//                videos.forEach(video -> {
-//                    video.setStreamUrl(BACKEND_API_URL + "/patients/patient/" + PATIENT_ID + "/videos/" + video.getFilename());
-//                    // Захардкоженные данные, если бекенд не возвращает
-//                    if (video.createdAt() == null) {
-//                        video.setCreatedAt("2024-03-20 10:00:00");
-//                    }
-//                    if (video.getDescription() == null) {
-//                        video.setDescription("Видео пациента");
-//                    }
-//                    if (video.getTags() == null) {
-//                        video.setTags(List.of("видео"));
-//                    }
-//                });
-//                return videos;
-//            }
         } catch (Exception e) {
             System.err.println("Ошибка при загрузке видео с бекенда: " + e.getMessage());
-            // В случае ошибки возвращаем заглушку для демонстрации
+            e.printStackTrace(); // Добавьте это для более детальной информации об ошибке
             return new ArrayList<>();
         }
     }
