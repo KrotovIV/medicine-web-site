@@ -8,7 +8,10 @@ import java.time.Period;
 @Service
 public class PatientCardFormatter {
 
-    public String formatAge(int age) {
+    public String formatAge(LocalDate birthDate) {
+        LocalDate now = LocalDate.now();
+        var age = Period.between(birthDate, now).getYears();
+
         int lastDigit = age % 10;
         int lastTwoDigits = age % 100;
 

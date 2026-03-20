@@ -53,7 +53,7 @@ public class HomePageController {
                 card -> PatientCard.builder()
                         .avatar(card.avatar())
                         .name(card.name())
-                        .age(patientCardFormatter.formatAge(card.age()))
+                        .age(patientCardFormatter.formatAge(card.birthDate()))
                         .condition(card.condition())
                         .lastVisitDate(patientCardFormatter.formatRelativeDate(card.lastVisitDate()))
                         .build()

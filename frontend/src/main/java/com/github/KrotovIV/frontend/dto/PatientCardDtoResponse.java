@@ -11,7 +11,7 @@ import java.time.LocalDate;
 public record PatientCardDtoResponse(
     String avatar,
     String name,
-    int age,
+    LocalDate birthDate,
     String condition,
     LocalDate lastVisitDate
 )

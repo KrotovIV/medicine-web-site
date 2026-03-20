@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 
 @RestController
@@ -21,7 +22,7 @@ public class PatientsDataController {
                 PatientCardDtoResponse.builder()
                         .avatar("👴")
                         .name("Иванов Иван")
-                        .age(72)
+                        .birthDate(LocalDate.of(1954, Month.FEBRUARY, 15))
                         .condition("Гипертония, артрит")
                         .lastVisitDate(LocalDate.now().minusDays(3))
                         .build(),
@@ -29,7 +30,7 @@ public class PatientsDataController {
                 PatientCardDtoResponse.builder()
                         .avatar("\uD83D\uDC75")
                         .name("Петрова Мария")
-                        .age(68)
+                        .birthDate(LocalDate.of(1975, Month.MARCH, 10))
                         .condition("Сахарный диабет 2 типа")
                         .lastVisitDate(LocalDate.now().minusDays(1))
                         .build(),
@@ -37,7 +38,7 @@ public class PatientsDataController {
                 PatientCardDtoResponse.builder()
                         .avatar("\uD83D\uDC68")
                         .name("Сидоров Алексей")
-                        .age(45)
+                        .birthDate(LocalDate.of(2000, Month.NOVEMBER, 21))
                         .condition("Профилактический осмотр")
                         .lastVisitDate(LocalDate.now().minusWeeks(2))
                         .build(),
@@ -45,7 +46,7 @@ public class PatientsDataController {
                 PatientCardDtoResponse.builder()
                         .avatar("\uD83D\uDC69")
                         .name("Козлова Елена")
-                        .age(34)
+                        .birthDate(LocalDate.of(1999, Month.AUGUST, 1))
                         .condition("Наблюдение, здоров")
                         .lastVisitDate(LocalDate.now().minusMonths(1))
                         .build(),
@@ -53,7 +54,7 @@ public class PatientsDataController {
                 PatientCardDtoResponse.builder()
                         .avatar("\uD83D\uDC74")
                         .name("Николаев Петр")
-                        .age(81)
+                        .birthDate(LocalDate.of(1995, Month.JULY, 11))
                         .condition("ИБС, ХСН")
                         .lastVisitDate(LocalDate.now().minusDays(5))
                         .build(),
@@ -62,7 +63,7 @@ public class PatientsDataController {
                 PatientCardDtoResponse.builder()
                         .avatar("\uD83D\uDC75")
                         .name("Смирнова Анна")
-                        .age(57)
+                        .birthDate(LocalDate.of(1980, Month.OCTOBER, 10))
                         .condition("Артроз, остеопороз")
                         .lastVisitDate(LocalDate.now())
                         .build()
