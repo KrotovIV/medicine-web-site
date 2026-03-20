@@ -1,8 +1,11 @@
 package com.github.KrotovIV.frontend.controllers;
 
 import com.github.KrotovIV.frontend.baseLogging.LoggingDecorator;
+import com.github.KrotovIV.frontend.dto.PatientCardDtoResponse;
+import com.github.KrotovIV.frontend.formatters.PatientCardFormatter;
 import com.github.KrotovIV.frontend.models.PatientCard;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -17,6 +20,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HomePageController {
     private final WebClient webClient;
+
+    @Autowired
+    private final PatientCardFormatter patientCardFormatter;
 
     private final String getPatientsListUrl = "http://127.0.0.1:8081/api/patients/list";
 
@@ -34,7 +40,7 @@ public class HomePageController {
         model.addAttribute("isAuthenticated", isAuthenticated);
         model.addAttribute("username", "Пользователь");
 
-//        // временно хардкод списка пациентов
+        // временно хардкод списка пациентов
 //        var patientsList = List.of(
 //            PatientCard.builder()
 //                    .avatar("👴")
@@ -88,15 +94,26 @@ public class HomePageController {
 //        );
 
 
+        // получение списка пациентов с бекенда
         var patientsList = webClient.get()
                         .uri(getPatientsListUrl)
                         .retrieve()
-                        .bodyToFlux(PatientCard.class)
+                        .bodyToFlux(PatientCardDtoResponse.class)
                         .collectList()
                         .block();
 
+        // форматирование данных
+        var formattedPatientsList = patientsList.stream().map(
+                card -> PatientCard.builder()
+                        .avatar(card.avatar())
+                        .name(card.name())
+                        .age(patientCardFormatter.formatAge(card.age()))
+                        .condition(card.condition())
+                        .lastVisitDate(patientCardFormatter.formatRelativeDate(card.lastVisitDate()))
+                        .build()
+        ).toList();
 
-        model.addAttribute("patients", patientsList);
+        model.addAttribute("patients", formattedPatientsList);
 
 
         return "home_page";
