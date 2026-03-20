@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавление пациента - Медицинский кабинет</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #faf7f0;
+            background-image: radial-gradient(#e0d5c0 1px, transparent 1px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Шапка */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 15px 25px;
+            background-color: rgba(255, 248, 235, 0.9);
+            border-radius: 30px;
+            box-shadow: 0 8px 20px rgba(180, 150, 100, 0.15);
+            border: 2px solid #ecd9b4;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 2px dashed #d4b68a;
+            border-radius: 25px;
+            pointer-events: none;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #a77b4f;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 10px 20px;
+            background-color: #fff0db;
+            border: 2px solid #ecd9b4;
+            border-radius: 50px;
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            background-color: #ffe9d1;
+            transform: translateX(-3px);
+            border-color: #dbbd95;
+        }
+
+        .welcome-badge {
+            background-color: #fff0db;
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 2px solid #ecd9b4;
+            color: #7d5e3a;
+            font-weight: 500;
+        }
+
+        /* Основная карточка */
+        .form-card {
+            background-color: #fffaf0;
+            border: 3px solid #ecd9b4;
+            border-radius: 50px;
+            padding: 40px;
+            box-shadow: 0 15px 30px rgba(170, 140, 100, 0.2);
+            position: relative;
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            border: 2px dashed #dbbd95;
+            border-radius: 42px;
+            pointer-events: none;
+        }
+
+        /* Заголовок */
+        .form-title {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .form-title h1 {
+            font-size: 2rem;
+            color: #7d5e3a;
+            font-weight: 500;
+            display: inline-block;
+            padding: 0 20px 10px 20px;
+            border-bottom: 4px dashed #e6c9a8;
+        }
+
+        /* Выбранный аватар */
+        .selected-avatar-section {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .selected-avatar-label {
+            color: #7d5e3a;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .selected-avatar {
+            width: 120px;
+            height: 120px;
+            background-color: #f5e6d3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            margin: 0 auto 10px auto;
+            border: 5px solid #e6c9a8;
+            box-shadow: 0 10px 0 #d2b48c;
+            transition: all 0.2s ease;
+            background: linear-gradient(145deg, #fff5e8, #f5e6d3);
+        }
+
+        .selected-avatar-hint {
+            color: #b99e7c;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        /* Список аватаров для выбора */
+        .avatars-section {
+            margin-bottom: 35px;
+        }
+
+        .avatars-label {
+            color: #7d5e3a;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: block;
+            text-align: center;
+        }
+
+        .avatars-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            justify-items: center;
+            align-items: center;
+        }
+
+        .avatar-option {
+            width: 75px;
+            height: 75px;
+            background-color: #f5e6d3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            cursor: pointer;
+            border: 3px solid #ecd9b4;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            background: linear-gradient(145deg, #fff5e8, #f5e6d3);
+        }
+
+        .avatar-option:hover {
+            transform: scale(1.1);
+            border-color: #dbbd95;
+            box-shadow: 0 6px 12px rgba(180, 150, 100, 0.2);
+            background: #fff5e8;
+        }
+
+        .avatar-option.selected {
+            border: 5px solid #c4a177;
+            background-color: #ffe9d1;
+            box-shadow: 0 8px 15px rgba(180, 150, 100, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Поля формы */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #7d5e3a;
+            font-weight: 500;
+            font-size: 1.1rem;
+            padding-left: 10px;
+        }
+
+        .input-wrapper {
+            background-color: #fff9f0;
+            border: 3px solid #ecd9b4;
+            border-radius: 60px;
+            padding: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #dbbd95;
+            box-shadow: 0 5px 15px rgba(180, 150, 100, 0.2);
+            transform: scale(1.02);
+            background-color: #ffffff;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            color: #b99e7c;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 20px 14px 55px;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            color: #5f4a2e;
+            border-radius: 60px;
+            outline: none;
+        }
+
+        .input-wrapper input::placeholder {
+            color: #d2b48c;
+            font-style: italic;
+        }
+
+        .relative {
+            position: relative;
+        }
+
+        /* Кнопки действий */
+        .actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 35px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background-color: #fff0db;
+            border: 3px solid #dbbd95;
+            color: #a77b4f;
+            box-shadow: 0 6px 0 #d2b48c;
+        }
+
+        .btn-primary:hover {
+            background-color: #ffe9d1;
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 #c4a177;
+        }
+
+        .btn-primary:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #c4a177;
+        }
+
+        .btn-secondary {
+            background-color: #fffaf0;
+            border: 3px solid #ecd9b4;
+            color: #b99e7c;
+        }
+
+        .btn-secondary:hover {
+            background-color: #fff5e8;
+            transform: translateY(-2px);
+            border-color: #dbbd95;
+        }
+
+        /* Сообщения */
+        .info-message {
+            background-color: rgba(255, 240, 219, 0.7);
+            border: 2px dashed #dbbd95;
+            border-radius: 40px;
+            padding: 15px 20px;
+            margin-top: 25px;
+            text-align: center;
+            color: #7d5e3a;
+        }
+
+        .error-message {
+            background-color: #fff0db;
+            border: 3px solid #e6b39a;
+            border-radius: 50px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            color: #b45f3a;
+            text-align: center;
+            border-style: dashed;
+        }
+
+        .error-message::before {
+            content: '⚠️';
+            margin-right: 8px;
+        }
+
+        .hand-drawn-line {
+            height: 2px;
+            background: repeating-linear-gradient(90deg, #dbbd95 0px, #dbbd95 8px, transparent 8px, transparent 16px);
+            margin: 25px 0;
+        }
+
+        @media (max-width: 550px) {
+            .form-card {
+                padding: 25px;
+            }
+
+            .avatars-grid {
+                gap: 10px;
+            }
+
+            .avatar-option {
+                width: 60px;
+                height: 60px;
+                font-size: 32px;
+            }
+
+            .selected-avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 50px;
+            }
+
+            .btn {
+                padding: 12px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Шапка -->
+    <div class="header">
+        <a href="/" class="back-link">
+            ← На главную
+        </a>
+        <div class="welcome-badge">
+            👨‍⚕️ <span th:text="${username}">Доктор</span>
+        </div>
+    </div>
+
+    <!-- Основная форма -->
+    <div class="form-card">
+        <div class="form-title">
+            <h1>➕ Добавить пациента</h1>
+        </div>
+
+        <!-- Сообщение об ошибке (если будет) -->
+        <div id="errorMessage" class="error-message" style="display: none;">
+            Пожалуйста, заполните все поля
+        </div>
+
+        <form id="patientForm" method="post" th:action="@{/patients/add}">
+            <!-- Скрытое поле для аватара -->
+            <input type="hidden" id="avatarEmoji" name="avatarEmoji" value="👴">
+
+            <!-- Выбранный аватар (превью) -->
+            <div class="selected-avatar-section">
+                <div id="selectedAvatarDisplay" class="selected-avatar">👴</div>
+            </div>
+
+            <!-- Список аватаров для выбора -->
+            <div class="avatars-section">
+                <div class="avatars-label">🎨 Выберите аватар пациента</div>
+                <div class="avatars-grid" id="avatarsGrid">
+                    <!-- Аватары будут вставлены через JS -->
+                </div>
+            </div>
+
+            <div class="hand-drawn-line"></div>
+
+            <!-- Поле Имя -->
+            <div class="form-group">
+                <label>📝 Имя пациента</label>
+                <div class="relative">
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text"
+                               id="patientName"
+                               name="name"
+                               placeholder="Введите полное имя пациента"
+                               required
+                               autocomplete="off">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Поле Дата рождения -->
+            <div class="form-group">
+                <label>🎂 Дата рождения</label>
+                <div class="relative">
+                    <div class="input-wrapper">
+                        <span class="input-icon">📅</span>
+                        <input type="date"
+                               id="birthDate"
+                               name="birthDate"
+                               required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">
+                    💾 Сохранить
+                </button>
+                <a href="/" class="btn btn-secondary">
+                    ❌ Отмена
+                </a>
+            </div>
+
+            <div class="info-message">
+                💡 После добавления пациент появится в списке на главной странице
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Список аватаров (эмодзи) - 8 штук
+    const avatars = [
+        '👴', '👵', '👨', '👩',
+        '🧑', '🧓', '👶', '👧'
+    ];
+
+    let currentSelectedAvatar = '👴';
+
+    // Функция для отображения аватаров
+    function renderAvatars() {
+        const grid = document.getElementById('avatarsGrid');
+        grid.innerHTML = '';
+
+        avatars.forEach(avatar => {
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'avatar-option';
+            if (avatar === currentSelectedAvatar) {
+                avatarDiv.classList.add('selected');
+            }
+            avatarDiv.textContent = avatar;
+            avatarDiv.onclick = () => selectAvatar(avatar);
+            grid.appendChild(avatarDiv);
+        });
+    }
+
+    // Функция выбора аватара
+    function selectAvatar(avatar) {
+        currentSelectedAvatar = avatar;
+
+        // Обновляем скрытое поле формы
+        document.getElementById('avatarEmoji').value = avatar;
+
+        // Обновляем превью выбранного аватара
+        document.getElementById('selectedAvatarDisplay').textContent = avatar;
+
+        // Обновляем классы выбранного аватара в сетке
+        const allAvatars = document.querySelectorAll('.avatar-option');
+        allAvatars.forEach(avatarElement => {
+            if (avatarElement.textContent === avatar) {
+                avatarElement.classList.add('selected');
+            } else {
+                avatarElement.classList.remove('selected');
+            }
+        });
+    }
+
+    // Валидация формы перед отправкой
+    function validateForm() {
+        const nameInput = document.getElementById('patientName');
+        const birthDateInput = document.getElementById('birthDate');
+        const errorDiv = document.getElementById('errorMessage');
+
+        if (!nameInput.value.trim()) {
+            errorDiv.textContent = '❌ Пожалуйста, укажите имя пациента';
+            errorDiv.style.display = 'block';
+            nameInput.focus();
+            return false;
+        }
+
+        if (!birthDateInput.value) {
+            errorDiv.textContent = '❌ Пожалуйста, укажите дату рождения';
+            errorDiv.style.display = 'block';
+            birthDateInput.focus();
+            return false;
+        }
+
+        // Проверка, что дата рождения не в будущем
+        const birthDate = new Date(birthDateInput.value);
+        const today = new Date();
+        if (birthDate > today) {
+            errorDiv.textContent = '❌ Дата рождения не может быть в будущем';
+            errorDiv.style.display = 'block';
+            return false;
+        }
+
+        errorDiv.style.display = 'none';
+        return true;
+    }
+
+    // Инициализация страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        renderAvatars();
+
+        // Навешиваем валидацию на форму
+        const form = document.getElementById('patientForm');
+        form.addEventListener('submit', (e) => {
+            if (!validateForm()) {
+                e.preventDefault();
+            }
+        });
+
+        // Убираем сообщение об ошибке при вводе
+        const nameInput = document.getElementById('patientName');
+        const birthDateInput = document.getElementById('birthDate');
+
+        nameInput.addEventListener('input', () => {
+            document.getElementById('errorMessage').style.display = 'none';
+        });
+
+        birthDateInput.addEventListener('change', () => {
+            document.getElementById('errorMessage').style.display = 'none';
+        });
+    });
+</script>
+</body>
+</html>

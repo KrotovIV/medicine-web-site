@@ -237,7 +237,7 @@
             backdrop-filter: blur(5px);
         }
 
-        /* Кнопка добавления (заглушка) */
+        /* Кнопка добавления */
         .add-button {
             display: inline-flex;
             align-items: center;
@@ -253,6 +253,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: 0 5px 0 #d2b48c;
+            text-decoration: none;
         }
 
         .add-button:hover {
@@ -323,9 +324,9 @@
 
         <!-- Кнопка добавления нового пациента (заглушка) -->
         <div style="text-align: center;">
-            <div class="add-button" onclick="alert('Форма добавления пациента (в разработке)')">
+            <a class="add-button" href="/add">
                 <span>➕</span> Добавить пациента
-            </div>
+            </a>
         </div>
 
         <!-- Декоративная линия -->
