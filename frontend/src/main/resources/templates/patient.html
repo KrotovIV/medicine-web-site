@@ -942,35 +942,94 @@
             return;
         }
 
-        const totalHeight = Math.max(500, filteredMedia.length * 245);
+        // Временный контейнер для измерения высоты карточек
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.visibility = 'hidden';
+        tempContainer.style.top = '-10000px';
+        tempContainer.style.left = '-10000px';
+        tempContainer.style.width = '280px'; // Такая же ширина как у карточек
+        document.body.appendChild(tempContainer);
+
+        const positions = [];
+        let currentTop = 60; // Начальный отступ сверху
+        const VERTICAL_GAP = 40; // Фиксированный отступ между карточками (можно настроить)
+
+        for (let i = 0; i < filteredMedia.length; i++) {
+            const media = filteredMedia[i];
+            const side = i % 2 === 0 ? 'left' : 'right';
+
+            // Создаем временную карточку для измерения высоты
+            const tempCard = document.createElement('div');
+            tempCard.className = `timeline-card ${side}`;
+            tempCard.style.position = 'relative';
+            tempCard.style.width = '280px';
+            tempCard.innerHTML = createMediaCardHTML(media);
+            tempContainer.appendChild(tempCard);
+
+            // Получаем реальную высоту карточки
+            const cardHeight = tempCard.offsetHeight;
+
+            // Сохраняем позицию
+            positions.push({
+                id: media.id,
+                top: currentTop,
+                height: cardHeight,
+                side: side
+            });
+
+            // Обновляем позицию для следующей карточки (текущая высота + отступ)
+            currentTop += cardHeight + VERTICAL_GAP;
+
+            // Очищаем временный контейнер для следующей итерации
+            tempContainer.innerHTML = '';
+        }
+
+        // Удаляем временный контейнер
+        document.body.removeChild(tempContainer);
+
+        // Устанавливаем общую высоту контейнера
+        const totalHeight = currentTop + 60; // Добавляем отступ снизу
         const timelineContainer = document.getElementById('timelineContainer');
         if (timelineContainer) {
             timelineContainer.style.minHeight = `${totalHeight}px`;
         }
 
-        filteredMedia.forEach((media, index) => {
-            const side = index % 2 === 0 ? 'left' : 'right';
+        // Рендерим карточки с рассчитанными позициями
+        for (let i = 0; i < filteredMedia.length; i++) {
+            const media = filteredMedia[i];
+            const pos = positions[i];
+
             const card = document.createElement('div');
-            card.className = `timeline-card ${side}`;
+            card.className = `timeline-card ${pos.side}`;
             card.setAttribute('data-id', media.id);
-            const topPositionCard = 60 + index * 245;
-            card.style.top = `${topPositionCard}px`;
+            card.style.top = `${pos.top}px`;
             card.innerHTML = createMediaCardHTML(media);
             container.appendChild(card);
 
-            if (filteredMedia.length - 1 !== index) {
+            // Добавляем точку на линию времени (для всех, кроме последней)
+            if (i < filteredMedia.length - 1) {
                 const dot = document.createElement('div');
                 dot.className = 'timeline-dot';
-                const topPosition = topPositionCard + 100;
-                dot.style.top = `${topPosition}px`;
+                // Располагаем точку по центру текущей карточки + половина отступа до следующей
+                const nextPos = positions[i + 1];
+                const dotTop = pos.top + pos.height + (VERTICAL_GAP / 2);
+                dot.style.top = `${dotTop}px`;
                 dot.title = media.date ? new Date(media.date).toLocaleString('ru-RU') : '';
                 dot.onclick = () => {
-                    const card = document.querySelector(`.timeline-card[data-id="${media.id}"]`);
-                    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const targetCard = document.querySelector(`.timeline-card[data-id="${media.id}"]`);
+                    if (targetCard) targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 };
                 container.appendChild(dot);
             }
-        });
+        }
+
+        // Добавляем точку в начале линии (опционально)
+        const startDot = document.createElement('div');
+        startDot.className = 'timeline-dot';
+        startDot.style.top = `30px`;
+        startDot.title = 'Начало';
+        container.appendChild(startDot);
     }
 
     // ========== ОБЩИЕ ФУНКЦИИ ==========
