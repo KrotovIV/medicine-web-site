@@ -25,6 +25,7 @@ public class HomePageController {
     private final PatientCardFormatter patientCardFormatter;
 
     private final String getPatientsListUrl = "http://127.0.0.1:8081/api/patients/list";
+    private final String getUsernameUrl = "http://127.0.0.1:8081/api/username";
 
     @LoggingDecorator
     @GetMapping("/")
@@ -36,9 +37,17 @@ public class HomePageController {
             return "redirect:/login";
         }
 
+        // получение имени пользователя с бекенда
+        var username = webClient.get()
+                .uri(getUsernameUrl)
+                .cookie("jwtToken", jwtToken)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
         // отображение статуса пользователя на странице
         model.addAttribute("isAuthenticated", isAuthenticated);
-        model.addAttribute("username", "Пользователь");
+        model.addAttribute("username", username);
 
         // получение списка пациентов с бекенда
         var patientsList = webClient.get()

@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Временный хардкод JWT
+ * эндпоинт для получения имени пользовтлея по JWT-токену
  */
 @RestController
 @RequestMapping("/api/username")
@@ -19,7 +19,7 @@ public class UserNameController {
 
     @LoggingDecorator
     @GetMapping
-    public ResponseEntity<?> getJwt(
+    public ResponseEntity<?> getName(
             @CookieValue("jwtToken") String jwtToken
     ) {
         var result = jwtTokenService.getUserByAccessToken(jwtToken);
