@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -41,6 +42,19 @@ public class PatientsDataController {
         String userLoginString = (String) userLogin;
         var patientsList = dataBaseService.getPatients(userLoginString);
         return ResponseEntity.ok(patientsList);
+    }
+
+    @LoggingDecorator
+    @PostMapping("/patient/add")
+    public ResponseEntity<?> addPatient(
+            @RequestParam("name") String name,
+            @RequestParam("emoji") String emoji,
+            @RequestParam("birthDate") LocalDate birthDate,
+            HttpServletRequest request
+    ) {
+        var userLogin = request.getAttribute("userLogin");
+        String userLoginString = (String) userLogin;
+       return dataBaseService.addPatient(name, emoji, birthDate, userLoginString);
     }
 
     @GetMapping("/patient/{id}/videos/{videoName}")

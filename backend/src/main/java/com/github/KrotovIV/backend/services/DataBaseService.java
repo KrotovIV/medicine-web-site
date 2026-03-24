@@ -3,14 +3,18 @@ package com.github.KrotovIV.backend.services;
 import com.github.KrotovIV.backend.dto.PatientCardDtoResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +24,8 @@ public class DataBaseService {
 
     private Map<String, List<Long>> userToHisPatientsIds = new ConcurrentHashMap<>();
     private Map<Long, PatientCardDtoResponse> patientIdToPatientCard = new ConcurrentHashMap<>();
+
+    private AtomicLong currentPatientId = new AtomicLong(0L);
 
     /**
      * Хардкод данных для теста
@@ -82,8 +88,40 @@ public class DataBaseService {
                 .build());
 
 
+
+        var list_ = new ArrayList<Long>();
+        list_.addAll(List.of(1L, 2L, 3L, 4L, 5L, 6L));
+
         //добавляем этих пациентов в список пользователя test
-        userToHisPatientsIds.put("test", List.of(1L, 2L, 3L, 4L, 5L, 6L));
+        userToHisPatientsIds.put("test", list_);
+
+        currentPatientId.set(7L);
+    }
+
+    public void registerUser(String userLogin) {
+        if (!userToHisPatientsIds.containsKey(userLogin))
+            userToHisPatientsIds.put(userLogin, new ArrayList<Long>());
+    }
+
+    public ResponseEntity<?> addPatient(String name, String emoji, LocalDate birthDate, String userLogin) {
+        var id = currentPatientId.getAndIncrement();
+
+        var patientCard = PatientCardDtoResponse.builder()
+                .id(id)
+                .avatar(emoji)
+                .birthDate(birthDate)
+                .name(name)
+                .condition("{PATIENT_CONDITION}")
+                .lastVisitDate(LocalDate.now())
+                .build();
+
+        // регистрация пациента
+        patientIdToPatientCard.put(id, patientCard);
+
+        // добавление пациента к пользователю
+        var patientsIds = userToHisPatientsIds.get(userLogin).add(id);
+
+        return ResponseEntity.ok().build();
     }
 
     public List<PatientCardDtoResponse> getPatients(String userLogin) {

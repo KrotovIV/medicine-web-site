@@ -1,6 +1,7 @@
 package com.github.KrotovIV.backend.controllers;
 
 import com.github.KrotovIV.backend.baseLogging.LoggingDecorator;
+import com.github.KrotovIV.backend.services.DataBaseService;
 import com.github.KrotovIV.backend.services.JwtTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +18,16 @@ public class RegisterController {
     @Autowired
     JwtTokenService jwtTokenService;
 
+    @Autowired
+    DataBaseService dataBaseService;
+
     @LoggingDecorator
     @GetMapping
     public ResponseEntity<?> getJwt(
             @RequestParam("login") String login,
             @RequestParam("password") String password
     ) {
+        dataBaseService.registerUser(login);
         return jwtTokenService.register(login, password);
     }
 }
