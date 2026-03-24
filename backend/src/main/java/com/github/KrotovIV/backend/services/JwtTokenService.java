@@ -41,6 +41,16 @@ public class JwtTokenService {
         return ResponseEntity.ok(response);
     }
 
+    public ResponseEntity<?> register(String login, String password) {
+        if (usersToPasswords.containsKey(login))
+            return ResponseEntity.status(409).body("Login already exists");
+
+        // сохранение данных пользователя
+        usersToPasswords.put(login, password);
+
+        return ResponseEntity.ok().build();
+    }
+
     /**
      * Хардкод тестового пользовтеля
      */

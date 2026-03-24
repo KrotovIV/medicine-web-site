@@ -196,6 +196,37 @@
             opacity: 0.7;
         }
 
+        /* Кнопка регистрации */
+        .register-button {
+            width: 100%;
+            background-color: #fff0db;
+            border: 3px solid #dbbd95;
+            border-radius: 60px;
+            padding: 18px 30px;
+            color: #a77b4f;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 7px 0 #d2b48c;
+            margin: 20px 0 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .register-button:hover {
+            background-color: #ffe9d1;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 0 #c4a177;
+        }
+
+        .register-button:active {
+            transform: translateY(4px);
+            box-shadow: 0 3px 0 #c4a177;
+        }
+
         /* Сообщение об ошибке */
         .error-message {
             background-color: #fff0db;
@@ -338,7 +369,7 @@
         </div>
 
         <!-- Форма входа -->
-        <form method="post" th:action="@{/login}" class="login-form">
+        <form method="post" class="login-form">
             <div class="form-group">
                 <label>👤 Имя пользователя</label>
                 <div class="input-wrapper">
@@ -367,8 +398,12 @@
             <div class="hand-drawn-line"></div>
 
             <!-- Кнопка входа -->
-            <button type="submit" class="login-button">
+            <button type="submit" formaction="/login" class="login-button">
                 Войти
+            </button>
+
+            <button type="submit" formaction="/register" class="register-button">
+                Зарегистрироваться
             </button>
         </form>
 
