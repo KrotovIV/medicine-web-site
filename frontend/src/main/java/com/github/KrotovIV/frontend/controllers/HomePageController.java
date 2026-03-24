@@ -43,6 +43,7 @@ public class HomePageController {
         // получение списка пациентов с бекенда
         var patientsList = webClient.get()
                         .uri(getPatientsListUrl)
+                .cookie("jwtToken", jwtToken)
                         .retrieve()
                         .bodyToFlux(PatientCardDtoResponse.class)
                         .collectList()
