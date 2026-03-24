@@ -6,6 +6,7 @@ import com.github.KrotovIV.backend.dto.PatientCardDtoResponse;
 import com.github.KrotovIV.backend.services.DataBaseService;
 import com.github.KrotovIV.backend.services.MediaFileService;
 import com.github.KrotovIV.backend.services.VideoStreamingService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.core.io.Resource;
@@ -33,8 +34,12 @@ public class PatientsDataController {
 
     @LoggingDecorator
     @GetMapping("/list")
-    public ResponseEntity<List<PatientCardDtoResponse>> getPatientsCardsList() {
-        var patientsList = dataBaseService.getPatients();
+    public ResponseEntity<List<PatientCardDtoResponse>> getPatientsCardsList(
+            HttpServletRequest request
+    ) {
+        var userLogin = request.getAttribute("userLogin");
+        String userLoginString = (String) userLogin;
+        var patientsList = dataBaseService.getPatients(userLoginString);
         return ResponseEntity.ok(patientsList);
     }
 
