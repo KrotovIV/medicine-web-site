@@ -32,24 +32,28 @@ public class RegisterController {
             @RequestParam("password") String password,
             HttpServletResponse response
     ) {
-        // регистрация
-        var backendResponse = webClient.get()
-                .uri(registerUrl, uriBuilder -> uriBuilder
-                        .queryParam("login", username)
-                        .queryParam("password", password)
-                        .build()
-                ).retrieve()
-                .toEntity(JwtDto.class)
-                .block();
+        try {
+            // регистрация
+            var backendResponse = webClient.get()
+                    .uri(registerUrl, uriBuilder -> uriBuilder
+                            .queryParam("login", username)
+                            .queryParam("password", password)
+                            .build()
+                    ).retrieve()
+                    .toEntity(JwtDto.class)
+                    .block();
 
-        // вход
-        var result = loginService.login(username, password, response);
+            // вход
+            var result = loginService.login(username, password, response);
 
-        // удачный вход
-        if (result.getStatusCode().is2xxSuccessful())
-            return "redirect:/";
+            // удачный вход
+            if (result.getStatusCode().is2xxSuccessful())
+                return "redirect:/";
 
-        // неудачный вход
-        return "redirect:/login?error=true";
+            // неудачный вход
+            return "redirect:/login?error=true";
+        } catch (Exception e) {
+            return "redirect:/login?error=true";
+        }
     }
 }

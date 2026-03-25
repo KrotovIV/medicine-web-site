@@ -44,14 +44,18 @@ public class LoginPageController {
             @RequestParam("password") String password,
             HttpServletResponse response
     ) {
-        var result = loginService.login(username, password, response);
+        try {
+            var result = loginService.login(username, password, response);
 
-        // удачный вход
-        if (result.getStatusCode().is2xxSuccessful())
-            return "redirect:/";
+            // удачный вход
+            if (result.getStatusCode().is2xxSuccessful())
+                return "redirect:/";
 
-        // неудачный вход
-        return "redirect:/login?error=true";
+            // неудачный вход
+            return "redirect:/login?error=true";
+        } catch (Exception e) {
+            return "redirect:/login?error=true";
+        }
     }
 
 }
