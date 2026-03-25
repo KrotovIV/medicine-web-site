@@ -41,7 +41,7 @@ public class PatientPageController {
         }
 
         // Получаем список видео с бекенда
-        List<VideoInfo> videos = fetchVideosFromBackend();
+        List<VideoInfo> videos = fetchVideosFromBackend(jwtToken);
 
         // Передаем данные на фронтенд
         model.addAttribute("patientId", PATIENT_ID);
@@ -51,17 +51,17 @@ public class PatientPageController {
         return "patient";
     }
 
-    private List<VideoInfo> fetchVideosFromBackend() {
+    private List<VideoInfo> fetchVideosFromBackend(String jwtToken) {
         try {
             String url = BACKEND_API_URL + "/patients/patient/" + PATIENT_ID + "/videos";
 
             System.out.println("url: " + url);
 
-            // Используем String[].class вместо String.class
             String[] videoFileNames = webClient.get()
                     .uri(url)
+                    .cookie("jwtToken", jwtToken)
                     .retrieve()
-                    .bodyToMono(String[].class)  // Изменено с bodyToFlux на bodyToMono
+                    .bodyToMono(String[].class)
                     .block();
 
             System.out.println("videoFileNames: " + Arrays.toString(videoFileNames));
