@@ -310,10 +310,11 @@
     <div th:if="${isAuthenticated}">
         <h2 class="section-title">📋 Мои пациенты</h2>
 
-        <!-- Сетка с карточками пациентов (хардкод для примера) -->
+        <!-- Сетка с карточками пациентов -->
         <div class="patients-grid">
             <!-- Список всех пациентов -->
-            <a th:each="patient : ${patients}" class="patient-card" href="/patient">
+            <a th:each="patient : ${patients}" class="patient-card"
+               th:href="|/patient?id=${patient.id}|">
                 <div class="card-decoration"></div>
                 <div class="patient-avatar" th:text="${patient.avatar}">$avatar$</div>
                 <div class="patient-name" th:text="${patient.name}">$name$</div>
@@ -323,7 +324,7 @@
             </a>
         </div>
 
-        <!-- Кнопка добавления нового пациента (заглушка) -->
+        <!-- Кнопка добавления нового пациента -->
         <div style="text-align: center;">
             <a class="add-button" href="/add">
                 <span>➕</span> Добавить пациента

@@ -61,6 +61,7 @@ public class HomePageController {
         // форматирование данных
         var formattedPatientsList = patientsList.stream().map(
                 card -> PatientCard.builder()
+                        .id(card.id())
                         .avatar(card.avatar())
                         .name(card.name())
                         .age(patientCardFormatter.formatAge(card.birthDate()))

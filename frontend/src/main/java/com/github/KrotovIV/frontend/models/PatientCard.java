@@ -7,6 +7,7 @@ import lombok.Builder;
  */
 @Builder
 public record PatientCard (
+    Long id,
     String avatar,
     String name,
     String age,
