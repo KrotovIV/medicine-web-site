@@ -103,7 +103,7 @@ public class DataBaseService {
             userToHisPatientsIds.put(userLogin, new ArrayList<Long>());
     }
 
-    public ResponseEntity<?> addPatient(String name, String emoji, LocalDate birthDate, String userLogin) {
+    public ResponseEntity<?> addPatient(String name, String emoji, LocalDate birthDate, String condition, String userLogin) {
         var id = currentPatientId.getAndIncrement();
 
         var patientCard = PatientCardDtoResponse.builder()
@@ -111,7 +111,7 @@ public class DataBaseService {
                 .avatar(emoji)
                 .birthDate(birthDate)
                 .name(name)
-                .condition("{PATIENT_CONDITION}")
+                .condition(condition)
                 .lastVisitDate(LocalDate.now())
                 .build();
 

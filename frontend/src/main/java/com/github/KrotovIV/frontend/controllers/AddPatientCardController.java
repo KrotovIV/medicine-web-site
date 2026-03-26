@@ -41,6 +41,7 @@ public class AddPatientCardController {
             @RequestParam("avatarEmoji") String avatarEmoji,
             @RequestParam("name") String name,
             @RequestParam("birthDate") LocalDate birthDate,
+            @RequestParam("condition") String condition,
             HttpServletResponse response
     ) {
 
@@ -52,6 +53,7 @@ public class AddPatientCardController {
                         .queryParam("name", name)
                         .queryParam("birthDate", birthDate)
                         .queryParam("emoji", avatarEmoji)
+                        .queryParam("condition", condition)
                         .build())
                 .cookie("jwtToken", jwtToken)
                 .retrieve()

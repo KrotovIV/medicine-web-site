@@ -50,11 +50,12 @@ public class PatientsDataController {
             @RequestParam("name") String name,
             @RequestParam("emoji") String emoji,
             @RequestParam("birthDate") LocalDate birthDate,
+            @RequestParam("condition") String condition,
             HttpServletRequest request
     ) {
         var userLogin = request.getAttribute("userLogin");
         String userLoginString = (String) userLogin;
-       return dataBaseService.addPatient(name, emoji, birthDate, userLoginString);
+       return dataBaseService.addPatient(name, emoji, birthDate, condition, userLoginString);
     }
 
     @GetMapping("/patient/{id}/videos/{videoName}")
