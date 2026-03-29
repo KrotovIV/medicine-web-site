@@ -232,6 +232,16 @@
             border: 2px solid #ecd9b4;
         }
 
+        .patient-condition {
+            color: #a77b4f;
+            font-size: 1.1rem;
+            background-color: #fff0db;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 40px;
+            border: 2px solid #ecd9b4;
+        }
+
         .media-nodes {
             position: relative;
             width: 100%;
@@ -544,10 +554,10 @@
     <div id="graphView" class="view-mode active">
         <div class="patient-map" id="patientMap">
             <div class="central-card" id="centralCard">
-                <div class="patient-avatar">👴</div>
-                <div class="patient-name">Иван Иванов</div>
-                <div class="patient-age">72 года</div>
-                <div class="patient-age" style="margin-top: 8px;">📅 15.03.1954</div>
+                <div class="patient-avatar" th:text="${avatar}">{AVATAR NOT FOUND}</div>
+                <div class="patient-name" th:text="${name}">{NAME NOT FOUND}</div>
+                <div class="patient-condition" th:text="${condition}">{CONDITION NOT FOUND}</div>
+                <div class="patient-age" style="margin-top: 8px;" th:text="|📅 ${age}|">{AGE NOT FOUND}</div>
             </div>
             <div class="media-nodes" id="mediaNodes"></div>
             <div class="connections-canvas" id="connectionsCanvas">

@@ -46,7 +46,9 @@ public class VideoStreamingService {
             String videoDir = String.format(MEDIA_PATH, patientId);
             // В реальном приложении здесь нужно сканировать директорию
             // Пока возвращаем заглушку
-            return List.of("video1.mp4", "video2.mp4");
+            if (patientId == 1L)
+                return List.of("video1.mp4", "video2.mp4");
+            return List.of();
         } catch (Exception e) {
             log.warning("Не удалось получить список видео для пациента " + patientId);
             return List.of();

@@ -2,21 +2,21 @@ package com.github.KrotovIV.frontend.controllers;
 
 import com.github.KrotovIV.frontend.baseLogging.LoggingDecorator;
 import com.github.KrotovIV.frontend.dto.PatientCardDtoResponse;
+import com.github.KrotovIV.frontend.formatters.PatientCardFormatter;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/patient")
@@ -25,14 +25,24 @@ public class PatientPageController {
 
     private final WebClient webClient;
 
-    // Захардкоженный ID пациента
-    private static final Long PATIENT_ID = 1L;
-    private static final String BACKEND_API_URL = "http://127.0.0.1:8081/api";
+    @Autowired
+    private PatientCardFormatter patientCardFormatter;
 
+    // Захардкоженный ID пациента
+    private static final String BACKEND_API_URL = "http://127.0.0.1:8081/api";
+    private final String getUsernameUrl = "http://127.0.0.1:8081/api/username";
+
+    private String getGetPatientDataUrl(Long id) {
+        return BACKEND_API_URL + "/patients/patient/" + id + "/data";
+    }
 
     @LoggingDecorator
     @GetMapping
-    public String getPatientPage(@CookieValue(value="jwtToken", required = false) String jwtToken, Model model) {
+    public String getPatientPage(
+            @CookieValue(value="jwtToken", required = false) String jwtToken,
+            @RequestParam(value="id") Long id,
+            Model model
+    ) {
         // проверка наличия jwt-токена в куках
         boolean isAuthenticated = jwtToken != null && !jwtToken.isEmpty();
 
@@ -40,20 +50,50 @@ public class PatientPageController {
             return "redirect:/login";
         }
 
+        // получение имени пользователя с бекенда
+        var username = webClient.get()
+                .uri(getUsernameUrl)
+                .cookie("jwtToken", jwtToken)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
         // Получаем список видео с бекенда
-        List<VideoInfo> videos = fetchVideosFromBackend(jwtToken);
+        List<VideoInfo> videos = fetchVideosFromBackend(jwtToken, id);
+
+
+        // данных пациента с бекенда
+        var patientData = webClient.get()
+                .uri(getGetPatientDataUrl(id))
+                .cookie("jwtToken", jwtToken)
+                .retrieve()
+                .bodyToMono(PatientCardDtoResponse.class)
+                .block();
+
+        var patientAvatar = patientData.avatar();
+        var patientName = patientData.name();
+        var patientBirthDate = patientData.birthDate();
+        var patientCondition = patientData.condition();
+        var patientLastVisitDate = patientData.lastVisitDate();
+
+        String patientAge = patientCardFormatter.formatAge(patientBirthDate);
 
         // Передаем данные на фронтенд
-        model.addAttribute("patientId", PATIENT_ID);
-        model.addAttribute("username", "Доктор"); // Заглушка для имени пользователя
+        model.addAttribute("age", patientAge);
+        model.addAttribute("condition", patientCondition);
+        model.addAttribute("avatar", patientAvatar);
+        model.addAttribute("name", patientName);
+        model.addAttribute("patientId", id);
+        model.addAttribute("username", username);
         model.addAttribute("videos", videos);
 
         return "patient";
     }
 
-    private List<VideoInfo> fetchVideosFromBackend(String jwtToken) {
+    private List<VideoInfo> fetchVideosFromBackend(String jwtToken, Long id) {
+        System.out.println("Trying to fetch videos for patient" + id);
         try {
-            String url = BACKEND_API_URL + "/patients/patient/" + PATIENT_ID + "/videos";
+            String url = BACKEND_API_URL + "/patients/patient/" + id + "/videos";
 
             System.out.println("url: " + url);
 

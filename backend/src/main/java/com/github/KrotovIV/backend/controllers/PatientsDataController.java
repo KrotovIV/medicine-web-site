@@ -45,6 +45,18 @@ public class PatientsDataController {
     }
 
     @LoggingDecorator
+    @GetMapping("patient/{id}/data")
+    public ResponseEntity<PatientCardDtoResponse> getPatientData(
+            @PathVariable("id") Long patientId
+    ) {
+        var patientData = dataBaseService.getPatientById(patientId);
+        if (patientData.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(patientData.get());
+    }
+
+    @LoggingDecorator
     @PostMapping("/patient/add")
     public ResponseEntity<?> addPatient(
             @RequestParam("name") String name,
