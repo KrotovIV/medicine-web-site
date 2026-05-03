@@ -2,6 +2,7 @@ package com.github.KrotovIV.backend.controllers;
 
 import com.github.KrotovIV.backend.PartialContentResource;
 import com.github.KrotovIV.backend.baseLogging.LoggingDecorator;
+import com.github.KrotovIV.backend.dto.MediaFilesListDto;
 import com.github.KrotovIV.backend.dto.PatientCardDtoResponse;
 import com.github.KrotovIV.backend.services.DataBaseService;
 import com.github.KrotovIV.backend.services.MediaFileService;
@@ -20,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -69,6 +71,37 @@ public class PatientsDataController {
         String userLoginString = (String) userLogin;
        return dataBaseService.addPatient(name, emoji, birthDate, condition, userLoginString);
     }
+
+    @LoggingDecorator
+    @GetMapping("/patient/{id}/mediafiles/list")
+    public ResponseEntity<MediaFilesListDto> getPatientMediaFilesList(
+            @PathVariable("id") Long patientId
+    ) {
+        // получаем и преобразуем список видео
+        var videoList = mediaFileService.getPatientVideos(patientId).stream().map(
+                item -> new MediaFilesListDto.MediaFileInfo(item, true)
+        ).toList();
+
+        // получаем и преобразуем список аудио
+        var audioList = mediaFileService.getPatientAudios(patientId).stream().map(
+                item -> new MediaFilesListDto.MediaFileInfo(item, true)
+        ).toList();
+
+        // получаем и преобразуем список фото
+        var photoList = mediaFileService.getPatientPhotos(patientId).stream().map(
+                item -> new MediaFilesListDto.MediaFileInfo(item, false)
+        ).toList();
+
+
+        // Возвращаем результат
+        return ResponseEntity.ok(MediaFilesListDto.builder()
+                .photosNamesList(photoList)
+                .audiosNamesList(audioList)
+                .videosNameslist(videoList)
+                .build()
+        );
+    }
+
 
     @GetMapping("/patient/{id}/videos/{videoName}")
     public ResponseEntity<Resource> streamVideo(

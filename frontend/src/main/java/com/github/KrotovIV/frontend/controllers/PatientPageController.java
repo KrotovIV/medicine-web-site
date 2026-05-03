@@ -1,6 +1,7 @@
 package com.github.KrotovIV.frontend.controllers;
 
 import com.github.KrotovIV.frontend.baseLogging.LoggingDecorator;
+import com.github.KrotovIV.frontend.dto.MediaFilesListDto;
 import com.github.KrotovIV.frontend.dto.PatientCardDtoResponse;
 import com.github.KrotovIV.frontend.formatters.PatientCardFormatter;
 import lombok.Builder;
@@ -36,6 +37,10 @@ public class PatientPageController {
         return BACKEND_API_URL + "/patients/patient/" + id + "/data";
     }
 
+    private String getMediaFilesListUrl(Long id) {
+        return BACKEND_API_URL + "/patients/patient/" + id + "/mediafiles/list";
+    }
+
     @LoggingDecorator
     @GetMapping
     public String getPatientPage(
@@ -62,7 +67,7 @@ public class PatientPageController {
         List<VideoInfo> videos = fetchVideosFromBackend(jwtToken, id);
 
 
-        // данных пациента с бекенда
+        // получение данных пациента с бекенда
         var patientData = webClient.get()
                 .uri(getGetPatientDataUrl(id))
                 .cookie("jwtToken", jwtToken)
@@ -77,6 +82,16 @@ public class PatientPageController {
         var patientLastVisitDate = patientData.lastVisitDate();
 
         String patientAge = patientCardFormatter.formatAge(patientBirthDate);
+
+        // получение списка медиафайлов пациента с бекенда
+        var mediaFilesListResponse = webClient.get()
+                .uri(getMediaFilesListUrl(id))
+                .cookie("jwtToken", jwtToken)
+                .retrieve()
+                .bodyToMono(MediaFilesListDto.class)
+                .block();
+
+        System.out.println("Recieved media filies response: " + mediaFilesListResponse.toString());
 
         // Передаем данные на фронтенд
         model.addAttribute("age", patientAge);

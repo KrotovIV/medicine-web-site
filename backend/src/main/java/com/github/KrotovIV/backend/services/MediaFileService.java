@@ -1,15 +1,14 @@
 package com.github.KrotovIV.backend.services;
 
-import lombok.extern.java.Log;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-
 @Service
 public class MediaFileService {
 
@@ -31,45 +30,41 @@ public class MediaFileService {
      * Получает список фото в base64 для пациента
      */
     public List<String> getPatientPhotos(Long patientId) {
-        try {
-            String photoPath = String.format(MEDIA_PATH + PHOTO_PATH, patientId);
-            // Для примера загружаем одно фото
-            String filePath = photoPath + "photo1.jpg";
-            return List.of(convertFileToBase64(filePath));
-        } catch (IOException e) {
-            System.out.println("Не удалось загрузить фото для пациента " + patientId + ": " + e.getMessage());
-            return List.of();
-        }
+//        try {
+//            String photoPath = String.format(MEDIA_PATH + PHOTO_PATH, patientId);
+//            // Для примера загружаем одно фото
+//            String filePath = photoPath + "photo1.jpg";
+//            return List.of(convertFileToBase64(filePath));
+//        } catch (IOException e) {
+//            System.out.println("Не удалось загрузить фото для пациента " + patientId + ": " + e.getMessage());
+//            return List.of();
+//        }
+        return new ArrayList<>(List.of());
     }
 
     /**
      * Получает список видео в base64 для пациента
      */
     public List<String> getPatientVideos(Long patientId) {
-        try {
-            String videoPath = String.format(MEDIA_PATH + VIDEO_PATH, patientId);
-            // Для примера загружаем одно видео
-            String filePath = videoPath + "video1.mp4";
-            return List.of(convertFileToBase64(filePath));
-        } catch (IOException e) {
-            System.out.println("Не удалось загрузить видео для пациента " + patientId + ": " + e.getMessage());
-            return List.of();
-        }
+        if (patientId == 1L)
+            return new ArrayList<>(List.of("video1.mp4", "video2.mp4"));
+        return new ArrayList<>(List.of());
     }
 
     /**
      * Получает список аудио в base64 для пациента
      */
     public List<String> getPatientAudios(Long patientId) {
-        try {
-            String audioPath = String.format(MEDIA_PATH + AUDIO_PATH, patientId);
-            // Для примера загружаем одно аудио
-            String filePath = audioPath + "audio1.mp3";
-            return List.of(convertFileToBase64(filePath));
-        } catch (IOException e) {
-            System.out.println("Не удалось загрузить аудио для пациента " + patientId + ": " + e.getMessage());
-            return List.of();
-        }
+//        try {
+//            String audioPath = String.format(MEDIA_PATH + AUDIO_PATH, patientId);
+//            // Для примера загружаем одно аудио
+//            String filePath = audioPath + "audio1.mp3";
+//            return List.of(convertFileToBase64(filePath));
+//        } catch (IOException e) {
+//            System.out.println("Не удалось загрузить аудио для пациента " + patientId + ": " + e.getMessage());
+//            return List.of();
+//        }
+        return new ArrayList<>(List.of());
     }
 
     /**
@@ -77,10 +72,7 @@ public class MediaFileService {
      */
     public List<String> getPatientTextNotes(Long patientId) {
         // Временные текстовые заметки для теста
-        return List.of(
-                "Заметка 1: Пациент жалуется на головную боль",
-                "Заметка 2: Рекомендовано сдать анализы крови",
-                "Заметка 3: Следующий прием через 2 недели"
-        );
+
+        return new ArrayList<>(List.of());
     }
 }
